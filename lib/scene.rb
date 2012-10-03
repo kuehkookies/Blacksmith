@@ -13,7 +13,7 @@ class Scene < GameState
 		player_start
 		@player.sword = nil
 		@area = [0,0]
-		@file = File.join(ROOT, "#{self.class.to_s.downcase}.yml")
+		@file = File.join(ROOT, "levels/#{self.class.to_s.downcase}.yml")
 		$window.clear_cache
 		game_objects.select { |game_object| !game_object.is_a? Player }.each { |game_object| game_object.destroy }
 		load_game_objects(:file => @file) unless self.class.to_s == "Zero"

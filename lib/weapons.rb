@@ -92,11 +92,11 @@ class Axe < Subweapons
 		super
 		@image = Image["weapons/ax.gif"]
 		@zorder = 300
-		@velocity_x *= 1
-		@velocity_y = -6
+		@velocity_x *= 2
+		@velocity_y = -7
 		@max_velocity = Module_Game::Environment::GRAV_CAP
 		@acceleration_y = Module_Game::Environment::GRAV_ACC # 0.4
-		@rotation = 15*@velocity_x
+		@rotation = 10*@velocity_x
 		@damage = 5
 		cache_bounding_box
 	end

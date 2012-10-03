@@ -152,7 +152,7 @@ class Player < Chingu::GameObject
 		# @velocity_x = @speed if holding?(:right)
 		#~ @velocity_y = -7
 		@velocity_y = -4
-		during(200){
+		during(150){
 			@vert_jump = true if !holding_any?(:left, :right)
 			if holding?(:z) && @jumping && !disabled
 				@velocity_y = -4  unless @velocity_y <=  -Module_Game::Environment::GRAV_CAP || !@jumping
@@ -212,7 +212,7 @@ class Player < Chingu::GameObject
 			end
 		end
 		self.each_collision($game_bridges) do |me, bridge|
-			if me.y <= bridge.y-2 && me.velocity_y >= 1
+			if me.y <= bridge.y+2 && me.velocity_y > 0
 				if @status == :hurt
 					hurt
 				else
