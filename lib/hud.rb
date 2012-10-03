@@ -2,19 +2,15 @@
 # Heads-up-display
 # ------------------------------------------------------
 class HUD < Chingu::BasicGameObject
-	attr_reader :gap
+	attr_reader :gap, :rect
 	def initialize(options={})
 		super
 		@player = options[:player] || parent.player
 		@x = options[:x]; @y = options[:y]
 		#~ @old_hp = @player.hp
-		@old_hp = $window.hp
+		@old_hp = $window.maxhp
 		@hud = Image["misc/hud.gif"]
-		if $window.subweapon == :none
-			@sub = nil
-		else
-			@sub = Image["misc/hud_#{$window.subweapon}.gif"] 
-		end
+		get_subweapon
 		@ammo = Text.new($window.ammo, :x => 36, :y => 55, :zorder => 300, :align => :right, :max_width => 16, :size => 16, :color => Color.new(0xFFDADADA), :font => "fonts/runescape_uf_regular.ttf")
 		#~ @ammo = Text.new($window.ammo, :x => 36, :y => 55, :zorder => 300, :align => :right, :max_width => 16, :size => 16, :color => Color.new(0xFFDADADA))
 		@rect = Rect.new(45,23,168*$window.hp/$window.maxhp,10)
@@ -33,28 +29,45 @@ class HUD < Chingu::BasicGameObject
 		parent.fill_gradient(:from => Color.new(255,20,20), :to => Color.new(160,20,20), :rect => @rect, :orientation => :vertical, :zorder => 290 )
 	end
 	
-	def refill_to_full
-		@rect.width = 168
+	#~ def refill_to_full
+		#~ @rect.width = 168
+	#~ end
+	
+	def get_subweapon
+		if $window.subweapon == :none
+			@sub = nil
+		else
+			@sub = Image["misc/hud_#{$window.subweapon}.gif"] 
+		end
+	end
+	
+	def reset 
+		@old_hp = $window.maxhp # $window.hp
+		@hud = Image["misc/hud.gif"]
+		get_subweapon
+		#~ refill_to_full
 	end
 	
 	def update
 		# @life.text = @player.hp.to_s unless @player.hp.to_s == @life.text
 		# @sub.text = @player.subweapon.to_s unless @player.subweapon.to_s == @sub.text
-		@sub = Image["misc/hud_#{$window.subweapon}.gif"] unless $window.subweapon == @sub or $window.subweapon == :none
+		#~ @sub = Image["misc/hud_#{$window.subweapon}.gif"] unless $window.subweapon == @sub or $window.subweapon == :none
+		#~ @sub = nil if $window.subweapon == :none
+		get_subweapon
 		@ammo.text = $window.ammo.to_s unless $window.ammo.to_s == @ammo.text
-		if $window.hp < @old_hp
+		#~ if $window.hp < @old_hp
 			unless @rect.width <= 168*$window.hp/$window.maxhp
 				#~ @rect.width -= 4 if @gap > 4
 				#~ @rect.width -= 2 if @gap <= 4 and @gap > 2
 				@rect.width -= 1 # if @gap <= 2
 			end
-		else
-			unless @rect.width >= 168*$window.hp/$window.maxhp
+		#~ else
+			unless @rect.width >= 168*$window.hp/$window.maxhp # 168*$window.hp/$window.maxhp
 				#~ @rect.width += 4 if @gap < -4
 				#~ @rect.width += 2 if @gap >= -4 and @gap < -2
 				@rect.width += 1 # if @gap >= -2hp
 			end
-		end
+		#~ end
 		#~ @rect.width = 168*$window.hp/$window.maxhp unless $window.hp == @old_hp
 	end
 end

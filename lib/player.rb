@@ -36,9 +36,9 @@ class Player < Chingu::GameObject
 		}
 		@animations[:stand].delay = 50
 		@animations[:stand].bounce = true
-		@animations[:walk].delay = 65
+		@animations[:walk].delay = 60 # 65
 		@image = @animations[:stand].first
-		@speed = 2 
+		@speed = 2
 		@status = :stand
 		@action = :stand
 		@invincible = false

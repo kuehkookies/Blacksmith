@@ -11,6 +11,7 @@ class Scene < GameState
 		self.input = { :escape => :exit, :e => :edit, :r => :restart, :space => Pause }
 		@backdrop = Parallax.new(:rotation_center => :top_left, :zorder => 10)
 		player_start
+		@hud = HUD.create(:player => @player) if @hud == nil
 		@player.sword = nil
 		@area = [0,0]
 		@file = File.join(ROOT, "levels/#{self.class.to_s.downcase}.yml")
@@ -24,7 +25,7 @@ class Scene < GameState
 		#~ @song = Gosu::Song.new("media/bgm/silence-of-daylight.ogg")
 		#~ @song.volume = 0.3
 		#~ @song.play(true)
-		p "same" if $window.map.current_level == $window.level - 1
+		#~ p "same" if $window.map.current_level == $window.level - 1
 		#~ if ($window.map.current_level ==  $window.level - 1) && $window.map.current_block == 0
 		#~ if $window.map.current_block == 0
 			#~ $game_bgm = Gosu::Song.new("media/bgm/#{Module_Game::BGM[$window.map.current_level]}.ogg", :volume => 0.3)
@@ -53,7 +54,7 @@ class Scene < GameState
 	end
 	
 	def restart
-		@hud = nil
+		#~ @hud.reset
 		switch_game_state($window.map.first_block)
 		$window.block = 1
 		$window.setup_player
@@ -62,7 +63,7 @@ class Scene < GameState
 	def player_start
 		#~ @player = $game_player == nil ?  Player.create() : $game_player
 		@player = Player.create()
-		@hud = HUD.create(:player => @player) if @hud == nil
+		# @hud = HUD.create(:player => @player) if @hud == nil
 		#~ after(100){@player.status = :stand; @player.action = :stand}
 		@player.reset_state
 	end
@@ -120,10 +121,8 @@ class Scene < GameState
 			@player.dead 
 		end
 		@hud.update
-		#~ $window.caption = "Le Trial, FPS: #{$window.fps}, #{@player.action}, #{@player.status}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.y_flag}]"
-		#~ $window.caption = "Le Trial, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.y_flag}] - #{@player.action} #{@player.status} - Level: #{$window.level}-#{$window.block}"
-		$window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}"
-		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.status} | #{@player.action} -- #{$window.transfer} | #{$window.map.current_level}-#{$window.map.current_block} | #{$window.level}-#{$window.block}"
+		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}"
+		$window.caption = "Scene0, FPS: #{$window.fps}, #{$window.subweapon}, #{@hud.rect.width}"
 	end
 end
 
@@ -166,7 +165,7 @@ class Level01 < Scene
 	def initialize
 		super
 		@area = [384,288]
-		@player.x = self.viewport.x+(@player.bb.width/2) # 32
+		@player.x = self.viewport.x+(@player.bb.width/2)+16 # 32
 		@player.y = 246
 		@player.y_flag = @player.y
 		self.viewport.game_area = [0,0,@area[0],@area[1]]
