@@ -24,10 +24,12 @@ class Game < Chingu::Window
 	attr_accessor :level, :block, :lives, :hp, :maxhp, :ammo, :wp_level, :subweapon, :map, :transfer
 	
 	def initialize
-		super(384,288)
+		#~ super(384,288)
 		#~ super(416,288)
 		#~ super(592,288)
 		#~ super(640,288)
+		#~ super(800,600)
+		super(544,416)
 		
 		Sound["sfx/swing.wav"]
 		Sound["sfx/klang.wav"]
@@ -38,26 +40,35 @@ class Game < Chingu::Window
 		
 		Font["runescape_uf_regular.ttf", 16]
 		
-		# self.factor = 2
 		retrofy # THE classy command!
+		#~ Gosu.enable_undocumented_retrofication
 		setup_player
 		setup_stage
+		#~ set_terrains
+		#~ self.factor = 2
 		@transfer = true
 		transitional_game_state(Transitional, :speed => 32)
 		blocks = [
-			#~ [Level00, Level01, Level02], #level 0
 			[Level00, Level01]
 		]
-		#~ $Game_BGM = Module_Game::BGM[@level]
+		$Game_BGM = Module_Game::BGM[@level]
 		#~ p $Game_BGM
 		@map = Map.new(:map =>blocks, :row => @level-1, :col => @block-1)
 		switch_game_state(@map.current)
+		#~ switch_game_state(Level00)
 		#~ transitional_game_state(Transitional, :speed => 32)
 		# self.caption = "Le Trial"
 	end
 	
 	def setup_stage
 		@level = 1
+		@block = 1
+	end
+	
+	def reset_stage
+		transferring
+		switch_game_state($window.map.first_block)
+		setup_player
 		@block = 1
 	end
 	
@@ -72,7 +83,7 @@ class Game < Chingu::Window
 	def setup_player
 		@hp = @maxhp = 16
 		#~ @lives = 3 unless @lives > 0
-		@ammo = 05
+		@ammo = 80
 		@wp_level = 1
 		@subweapon = :none
 	end
@@ -84,7 +95,14 @@ class Game < Chingu::Window
 		$game_terrains = []
 		$game_bridges = []
 		$game_items = []
+		$game_subweapons.each {|me|me.destroy}
 		$game_subweapons = []
+	end
+	
+	def draw
+		scale(2) do
+		   super
+		end
 	end
 end
 

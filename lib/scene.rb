@@ -1,3 +1,12 @@
+#~ module Chingu
+	#~ class Viewport
+		#~ def center_around(object)
+			#~ self.x = object.x - $window.width / 2
+			#~ self.y = object.y - $window.height / 2
+		#~ end
+	#~ end
+#~ end
+
 # ------------------------------------------------------
 # Scenes
 # What's happening in each blocks?
@@ -11,10 +20,11 @@ class Scene < GameState
 		self.input = { :escape => :exit, :e => :edit, :r => :restart, :space => Pause }
 		@backdrop = Parallax.new(:rotation_center => :top_left, :zorder => 10)
 		player_start
-		@hud = HUD.create(:player => @player) if @hud == nil
+		@hud = HUD.create(:player => @player) # if @hud == nil
 		@player.sword = nil
 		@area = [0,0]
-		@file = File.join(ROOT, "levels/#{self.class.to_s.downcase}.yml")
+		#~ @file = File.join(ROOT, "levels/#{self.class.to_s.downcase}.yml")
+		@file = File.join(ROOT, "#{self.class.to_s.downcase}.yml")
 		$window.clear_cache
 		game_objects.select { |game_object| !game_object.is_a? Player }.each { |game_object| game_object.destroy }
 		load_game_objects(:file => @file) unless self.class.to_s == "Zero"
@@ -40,24 +50,20 @@ class Scene < GameState
 	def draw
 		#~ @backdrop.draw
 		@hud.draw unless @hud == nil
+		# Get Chingu to draw all your dynamic sprites normally.
 		super
 	end
 	
 	def edit
-		# Bridges
-		#~ push_game_state(GameStates::Edit.new(:grid => [16,16], :classes => [Ground, GroundTiled, GroundLower, GroundLoop, GroundBack, Ball, Zombie, Reaper, Ball_Knife, BridgeGray, BridgeGrayMid, BridgeGrayLeft, BridgeGrayRight, BridgeGrayPole, BridgeGrayLL, BridgeGrayLR, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM ] ))
-		# Small Bridges
-		#~ push_game_state(GameStates::Edit.new(:grid => [16,16], :classes => [Ground, GroundLower, GroundLoop, GroundBack, BridgeGraySmall, BridgeGrayLeftSmall, BridgeGrayRightSmall, BridgeGrayPoleSmall, BridgeGrayMidSmall] ))
-		# Grounds
-		# push_game_state(GameStates::Edit.new(:grid => [16,16], :classes => [Zombie, Ground, GroundTiled, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM, GroundLower, GroundLoop, GroundBack, Ball_Knife, BridgeGraySmall, BridgeGrayLeftSmall, BridgeGrayRightSmall, BridgeGrayPoleSmall, BridgeGrayMidSmall] ))
-		push_game_state(GameStates::Edit.new(:grid => [16,16], :classes => [Zombie, Ball_Knife, Ball_Rang, Ball_Axe, Ball, Ball_Sword, Ground, GroundTiled, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM, GroundLower, GroundLoop, GroundBack, BridgeGraySmall, BridgeGrayLeftSmall, BridgeGrayRightSmall, BridgeGrayPoleSmall, BridgeGrayMidSmall] ))
+
+		push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Zombie, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM, BridgeGraySmall, BridgeGrayLeftSmall, BridgeGrayRightSmall, BridgeGrayPoleSmall, BridgeGrayMidSmall, Zombie, Ball_Rang, Ball,Ground] ))
 	end
 	
 	def restart
-		#~ @hud.reset
-		switch_game_state($window.map.first_block)
-		$window.block = 1
-		$window.setup_player
+		#~ switch_game_state($window.map.first_block)
+		#~ $window.block = 1
+		#~ $window.setup_player
+		$window.reset_stage
 	end
 	
 	def player_start
@@ -101,8 +107,14 @@ class Scene < GameState
 		#~ return solid_pixel_at?(@player.x, @player.y) && solid_pixel_at?(@player.x + 1, @player.y)
 	#~ end
 	
+	#~ def center_around
+		#~ self.viewport.x = @player.x - $window.o_width / 2
+		#~ self.viewport.y = @player.y - $window.o_height / 2
+	#~ end
+	
 	def update
 		super
+		@hud.update
 		#~ update_trait
 		self.viewport.center_around(@player)
 		$game_enemies.each { |enemy| 
@@ -117,21 +129,25 @@ class Scene < GameState
 		}
 		Axe.destroy_if {|axe| axe.y > self.viewport.y + $window.height or axe.x < self.viewport.x or axe.x > self.viewport.x + $window.width}
 		Rang.destroy_if {|rang| self.viewport.outside_game_area?(rang) and rang.turn_back }
-		if @player.y > self.viewport.y + $window.height
+		if @player.y > self.viewport.y + $window.height/2 + @player.height/2
 			@player.dead 
 		end
-		@hud.update
-		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}"
-		$window.caption = "Scene0, FPS: #{$window.fps}, #{$window.subweapon}, #{@hud.rect.width}"
+		$window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}, #{self.viewport.game_area}"
+		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.status}, #{@player.action}"
 	end
 end
 
 class Level00 < Scene
 	def initialize
 		super
-		@area = [592,288]
-		@player.x = 32
-		@player.y = 246
+		#~ @area = [592,288]
+		#~ @area = [592, 416]
+		@area = [592, 288]
+		#~ @area = [592, 288]
+		@player.x = 64
+		@player.y = 247
+		#~ @player.y = 246
+		#~ @player.y = 360
 		@player.y_flag = @player.y
 		self.viewport.game_area = [0,0,@area[0],@area[1]]
 		@backdrop << {:image => "parallax/panorama1-1.png", :damping => 10, :repeat_x => true, :repeat_y => false}
@@ -186,6 +202,7 @@ class Level01 < Scene
 		#~ if @player.x >= @area[0]-(@player.bb.width) && (@player.y > 214 && @player.y < 216) # self.viewport.x+$window.width-(@player.bb.width/2)-1
 			#~ to_next_block
 		#~ end
+		#~ @backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i, self.viewport.y.to_i
 		@backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i, self.viewport.y.to_i
 		@backdrop.update
 	end

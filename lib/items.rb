@@ -9,7 +9,7 @@ class Items < GameObject
 	def setup
 		@image = Image["items/#{self.filename}.gif"]
 		@player = parent.player
-		@acceleration_y = 0.5
+		@acceleration_y = 0.6
 		@max_velocity = 8
 		self.zorder = 300
 		self.rotation_center = :bottom_center

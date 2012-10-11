@@ -64,8 +64,9 @@ class Knife < Subweapons
 	
 	def deflect
 		Sound["sfx/klang.wav"].play(0.1)
-		@velocity_x *= -0.1
-		@velocity_y = -4
+		@velocity_x *= -0.15
+		@velocity_y = -6
+		#~ @velocity_y = -9
 		@rotation = 25*@velocity_x
 		@acceleration_y = Module_Game::Environment::GRAV_ACC # 0.5
 		@collidable = false
@@ -81,7 +82,7 @@ class Knife < Subweapons
 	def die
 		self.collidable = false
 		@velocity_x = 0
-		after(100){destroy}
+		after(100){super}
 	end
 end
 

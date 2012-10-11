@@ -51,6 +51,7 @@ class Enemy < GameObject
 	
 	def land?
 		self.each_collision($game_terrains) do |me, stone_wall|
+		#~ self.each_collision(Ground) do |me, stone_wall|
 			if collision_at?(me.x, me.y)
 				if self.velocity_y < 0  # Hitting the ceiling
 					me.y = stone_wall.bb.bottom + me.image.height * me.factor_y
@@ -257,7 +258,7 @@ class Raven < Enemy
 	def wait
 		self.velocity_x = 0
 		self.velocity_y = 0
-		self.factor_x = -@gap_x/(@gap_x.abs).abs
+		self.factor_x = (-@gap_x/(@gap_x.abs).abs)*$window.factor
 		unless @flutter != nil
 		every(500){ 
 			if @gap_x > -150 and @gap_x < 150 and @flutter == nil
@@ -289,7 +290,7 @@ class Raven < Enemy
 				@gap_x = @x - @player.x
 				@gap_y = @y - @player.y
 				@gap_x = self.factor_x if @gap_x == 0
-				self.factor_x = -@gap_x/(@gap_x.abs).abs
+				self.factor_x = (-@gap_x/(@gap_x.abs).abs)*$window.factor
 			}
 			after(3000) { @flutter = false;	dive(-self.factor_x, @gap_x, @gap_y) }
 		end
@@ -314,7 +315,7 @@ class Raven < Enemy
 			self.velocity_x = 0 if self.velocity_x != 0 
 			self.velocity_y = 0 if self.velocity_y != 0 
 			self.collidable = false
-			self.factor_y = -1
+			self.factor_y = -$window.factor
 			# self.velocity_x = self.velocity_x
 			self.velocity_y = 0.5
 			self.velocity_x = 0.2*-self.factor
@@ -354,7 +355,7 @@ class Zombie < Enemy
 		@velocity_y = 2
 		self.rotation_center = :bottom_center
 		@image = @animations[:walk].first
-		@factor_x = -@gap_x/(@gap_x.abs).abs
+		@factor_x = (-@gap_x/(@gap_x.abs).abs)*$window.factor
 		cache_bounding_box
 	end
 	
@@ -397,7 +398,7 @@ class Ghoul < Enemy
 		super
 		@animations = Chingu::Animation.new(:file => "enemies/ghouls.png", :size => [32,32])
 		@color = Color.new(0xff88DD44)
-		@sword = Ghoul_Sword.create(:x => @x+(3*-@factor), :y => (@y-6), :velocity => @direction, :factor_x => -@factor, :zorder => self.zorder + 1)
+		@sword = Ghoul_Sword.create(:x => @x+(3*-@factor), :y => (@y-12), :velocity => @direction, :factor_x => -@factor, :zorder => self.zorder + 1)
 		@animations.frame_names = {
 			:walk => 0..3,
 			:attack => 4..5
@@ -413,7 +414,7 @@ class Ghoul < Enemy
 		@velocity_y = 2
 		self.rotation_center = :bottom_center
 		@image = @animations[:walk].first
-		@factor_x = -@gap_x/(@gap_x.abs).abs
+		@factor_x = (-@gap_x/(@gap_x.abs).abs)*$window.factor
 		cache_bounding_box
 	end
 	
@@ -443,20 +444,19 @@ class Ghoul < Enemy
 	
 	def update
 		super
-		
 		@gap_x = @x - @player.x
 		@gap_y = @y - @player.y
 		if @gap_x < 0 #and @action != :attack
-			@factor_x = 1 unless @action == :attack
+			@factor_x = $window.factor unless @action == :attack
 		else
-			@factor_x = -1 unless @action == :attack
+			@factor_x = -$window.factor unless @action == :attack
 		end
 		
 		land?
 		destroy if self.parent.viewport.outside_game_area?(self)
 		check_collision
 		
-		if @gap_x.abs < 32 and @gap_y.abs < 16
+		if @gap_x.abs < 64 and @gap_y.abs < 32
 			attack unless @action == :attack
 		end
 		
@@ -543,7 +543,7 @@ class Musket < Enemy
 		@shooting = false
 		@idle = true
 		@image = @animations[:aim].first
-		self.factor_x = -@gap_x/(@gap_x.abs).abs
+		@factor_x = (-@gap_x/(@gap_x.abs).abs)*$window.factor
 		cache_bounding_box
 		wait
 	end
@@ -628,7 +628,8 @@ class Reaper < Enemy
 	def setup
 		super
 		@animations = Chingu::Animation.new(:file => "enemies/reaper.png", :size => [44,49])
-		@scite = Reaper_Scite.create(:x => @x+(18*@factor_x), :y => @y - 13, :velocity => @direction, :zorder => self.zorder + 1)
+		#~ @scite = Reaper_Scite.create(:x => @x+(18*@factor_x), :y => @y - 13, :velocity => @direction, :zorder => self.zorder + 1)
+		@scite = Reaper_Scite.create(:x => @x+(36*@factor_x), :y => @y - 26, :velocity => @direction, :zorder => self.zorder + 1)
 		@animations.frame_names = {
 			:fly =>  0..2
 		}
@@ -640,7 +641,7 @@ class Reaper < Enemy
 		@direction = :upward
 		@image = @animations[:fly].first
 		self.rotation_center =  :center
-		self.factor_x = @gap_x/(@gap_x.abs).abs
+		self.factor_x = (@gap_x/(@gap_x.abs).abs)*$window.factor
 		@max_velocity = 2
 		float
 		cache_bounding_box
@@ -702,12 +703,12 @@ class Reaper < Enemy
 		@gap_x = @x - @player.x
 		@gap_y = @y - @player.y
 		if @gap_x < 0
-			@factor_x = -1 unless @status != :idle
+			@factor_x = -$window.factor unless @status != :idle
 		else
-			@factor_x = 1 unless @status != :idle
+			@factor_x = $window.factor unless @status != :idle
 		end
 		@scite.x = @x+(18*@factor_x)
-		@scite.y = @y-13
+		@scite.y = @y-25
 		@scite.factor_x = @factor_x
 		
 		#~ unless @x < 60 || @x > parent.viewport.x + $window.width - 60

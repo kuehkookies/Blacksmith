@@ -8,7 +8,6 @@ class Spark < GameObject
 		@spark = Chingu::Animation.new( :file => "misc/spark.gif", :size => [15,15])
 		@spark.delay = 20
 		self.mode = :additive
-		self.factor = 1
 		self.zorder = 400
 		@image = @spark.first
 	end

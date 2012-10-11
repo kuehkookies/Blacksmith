@@ -20,11 +20,14 @@ class Block < GameObject
     # @image = Image["block-block.png"]
     # @image = Image["block-#{self.filename}.png"].dup
     @image = Image["tiles/block-#{self.filename}.png"]
+	#~ p self.class
 	$game_terrains << self
+	#~ $game_terrains << self.name unless $game_terrains.include?(self.name)
 		
     # @color = Color.new(0xff808080)
     cache_bounding_box
   end
+
   def update; end
 end
 

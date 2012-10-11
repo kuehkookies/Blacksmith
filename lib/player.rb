@@ -108,7 +108,8 @@ class Player < Chingu::GameObject
 	def land
 		delay = 300
 		delay = 400 if @action == :attack
-		if (@y - @y_flag > 60 or (@y - @y_flag > 44 && @status == :jump ) ) && @status != :die
+		#~ if (@y - @y_flag > 60 or (@y - @y_flag > 44 && @status == :jump ) ) && @status != :die
+		if (@y - @y_flag > 90 or (@y - @y_flag > 56 && @status == :jump ) ) && @status != :die
 		#~ if (@y - @y_flag > 40) && @status != :die
 			Sound["sfx/step.wav"].play
 			between(1,delay) { 
@@ -147,15 +148,17 @@ class Player < Chingu::GameObject
 		return if @status == :crouch or @status == :jump or @status == :hurt or die? or @action != :stand 
 		@status = :jump
 		@jumping = true
-		jump_add = 0
+		Sound["sfx/jump.wav"].play
+		#~ jump_add = 0
 		# @velocity_x = -@speed if holding?(:left)
 		# @velocity_x = @speed if holding?(:right)
-		#~ @velocity_y = -7
+		#~ @velocity_y = -9
 		@velocity_y = -4
 		during(150){
 			@vert_jump = true if !holding_any?(:left, :right)
 			if holding?(:z) && @jumping && !disabled
 				@velocity_y = -4  unless @velocity_y <=  -Module_Game::Environment::GRAV_CAP || !@jumping
+				#~ @velocity_y = -9 unless @velocity_y <=  -Module_Game::Environment::GRAV_CAP || !@jumping
 			else
 				@velocity_y = -1 unless !@jumping
 			end
@@ -197,6 +200,7 @@ class Player < Chingu::GameObject
 	
 	def land?
 		self.each_collision($game_terrains) do |me, stone_wall|
+		#~ self.each_collision(Ground) do |me, stone_wall|
 			if self.velocity_y < 0  # Hitting the ceiling
 				me.y = stone_wall.bb.bottom + me.image.height * me.factor_y
 				me.velocity_y = 0
@@ -233,7 +237,8 @@ class Player < Chingu::GameObject
 		$window.hp -= damage # 3
 		$window.hp = 0 if $window.hp <= 0
 		self.velocity_x = (self.factor_x*-1)
-		self.velocity_y = -3
+		self.velocity_y = -4
+		#~ self.velocity_y = -6
 		land?
 	end
 	
@@ -262,18 +267,13 @@ class Player < Chingu::GameObject
 		#~ }.then {
 		after(200){
 			@image = @animations[:die].first
-			@x += 8*@factor_x unless @y > $window.height + parent.viewport.y
-			game_state.after(1000) { 
-				$window.transferring
-				#~ $window.setup_player
+			@x += 8*@factor_x unless @y > ($window.height-208) + parent.viewport.y
+			game_state.after(1500) { 
 				@sword.die if @sword != nil
-				$window.switch_game_state($window.map.first_block)
-				$window.setup_player
 				reset_state
-				#~ $window.push_game_state(Zero)
+				$window.reset_stage
 			}
 		}
-		$window.block = 1
 		#~ $window.setup_player
 		#~ reset_stats
 	end
@@ -300,7 +300,8 @@ class Player < Chingu::GameObject
 			@x += x/2 if @vert_jump
 		end
 		
-		self.each_collision($game_terrains) do |me, stone_wall|
+		#~ self.each_collision($game_terrains) do |me, stone_wall|
+		self.each_collision(Ground) do |me, stone_wall|
 			@x = previous_x 
 			break
 		end
@@ -338,15 +339,21 @@ class Player < Chingu::GameObject
 		@image = @animations[:shoot].first
 		@image = @animations[:crouch_shoot].first if @status == :crouch
 		factor = -(self.factor_x^0)
-		@sword = Sword.create(:x => @x+(5*factor), :y => (@y-14), :velocity => @direction, :factor_x => -factor, :angle => 90*factor)
+		@sword = Sword.create(:x => @x+(5*factor), :y => (@y-14), :velocity => @direction, :factor_x => -factor, :angle => 90*(-factor_x))
+		#~ @sword = Sword.create(:x => @x+(20*(-factor_x/2)), :y => (@y-28), :velocity => @direction, :factor_x => -factor, :angle => 90*(-factor_x/2))
 		between(1, 20) {
 			unless disabled or @action == :raise
-				@sword.x = @x+(7*factor)
+				@sword.x = @x+(7*(-factor_x))
+				#~ @sword.x = @x+(14*(-factor_x/2))
 				# @sword.y = (@y-12)
 				@sword.y = (@y-(self.height/2)-3)
 				@sword.y = (@y-(self.height/2)+2) if @status == :crouch or @status == :jump
 				@sword.y = (@y-(self.height/2)+2) if @status == :jump
-				@sword.angle = 120*factor
+				#~ @sword.y = (@y-(self.height/2)+3)
+				#~ @sword.y = (@y-(self.height/2)+6) if @status == :crouch or @status == :jump
+				#~ @sword.y = (@y-(self.height/2)+6) if @status == :jump
+				@sword.angle = 120*(-factor_x)
+				#~ @sword.angle = 120*(-factor_x/2)
 				@sword.velocity = @direction
 			end
 		}. then {
@@ -354,10 +361,14 @@ class Player < Chingu::GameObject
 		}
 		between(20,75) {
 			unless disabled or @action == :raise
-				@sword.x = @x+(7*factor)
+				@sword.x = @x+(7*(-factor_x))
+				#~ @sword.x = @x+(14*(-factor_x/2))
 				@sword.y = (@y-(self.height/2)-3)
 				@sword.y = (@y-(self.height/2)+2) if @status == :crouch # or @status == :jump
-				@sword.angle = 140*(factor)
+				#~ @sword.y = (@y-(self.height/2)+3)
+				#~ @sword.y = (@y-(self.height/2)+6) if @status == :crouch # or @status == :jump
+				@sword.angle = 140*(-factor_x)
+				#~ @sword.angle = 140*(-factor_x/2)
 				@sword.velocity = [0,0]
 			end
 		}.then {
@@ -371,16 +382,20 @@ class Player < Chingu::GameObject
 			@sword.collidable = true
 			#~ @sword.bb.width = (@sword.bb.width*4/5)
 			@sword.bb.height = (@sword.bb.width)*-1
-			@sword.angle = 130*(factor) unless @action == :raise
+			@sword.angle = 130*(-factor_x) unless @action == :raise
+			#~ @sword.angle = 130*(-factor_x/2) unless @action == :raise
 		}
 		between(75,175) {
 			unless disabled or @action == :raise
-				# @sword.x = @x-(4*factor)
-				@sword.x = @x-(9*factor)
+				@sword.x = @x-(4*factor)
+				#~ @sword.x = @x-(20*(-factor_x/2))
 				@sword.y = (@y-(self.height/2)-1)
 				@sword.y = (@y-(self.height/2)+4) if @status == :crouch # or @status == :jump
+				#~ @sword.y = (@y-(self.height/2)+5)
+				#~ @sword.y = (@y-(self.height/2)+10) if @status == :crouch # or @status == :jump
 				# @sword.angle = 45*(factor)
-				@sword.angle -= 20*(factor)
+				@sword.angle -= 20*(-factor_x)
+				#~ @sword.angle -= 20*(-factor_x/2)
 				@sword.velocity = [0,0]
 			end
 		}.then {
@@ -402,7 +417,10 @@ class Player < Chingu::GameObject
 				# @sword.y = @y-10
 				@sword.y = (@y-(self.height/2)+6)
 				@sword.y = (@y-(self.height/2)+11) if @status == :crouch # or @status == :jump
-				@sword.angle = 0*(factor)
+				#~ @sword.y = (@y-(self.height/2)+12)
+				#~ @sword.y = (@y-(self.height/2)+22) if @status == :crouch # or @status == :jump
+				#~ @sword.angle = 0*(factor)
+				@sword.angle = 0*(-factor_x/2)
 				@image = @animations[:crouch_shoot].last if @status == :crouch
 			end
 		}.then {
