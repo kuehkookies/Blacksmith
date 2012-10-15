@@ -74,7 +74,7 @@ class Knife < Subweapons
 	
 	def update
 		@angle += @rotation
-		self.each_collision($game_terrains) do |knife, wall|
+		self.each_collision(*$game_terrains) do |knife, wall|
 			knife.deflect
 		end
 	end

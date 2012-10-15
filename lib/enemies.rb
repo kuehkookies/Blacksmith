@@ -20,11 +20,12 @@ class Enemy < GameObject
 		#~ $game_enemies << self
 	end
 	
-	def hit(weapon)
+	def hit(weapon, x, y)
 		unless die?
 			# Spark.create(:x => self.x+((self.bb.width*3/5)*-@player.factor_x), :y => self.y-(self.height*1/5), :angle => 30*@player.factor_x)
-			Spark.create(:x => self.x, :y => self.y-@player.height*1/4, :angle => 30*@player.factor_x)
+			#~ Spark.create(:x => self.x, :y => self.y-@player.height*1/4, :angle => 30*@player.factor_x)
 			#~ Spark.create(:x => self.x - weapon.x + weapon.width, :y =>  self.y - weapon.y + weapon.height, :angle => 30*@player.factor_x)
+			Spark.create(:x => x, :y =>  y, :angle => 30*@player.factor_x)
 			Sound["sfx/hit.wav"].play(0.5)
 			@hp -= weapon.damage
 			die
@@ -50,8 +51,7 @@ class Enemy < GameObject
 	end
 	
 	def land?
-		self.each_collision($game_terrains) do |me, stone_wall|
-		#~ self.each_collision(Ground) do |me, stone_wall|
+		self.each_collision(*$game_terrains) do |me, stone_wall|
 			if collision_at?(me.x, me.y)
 				if self.velocity_y < 0  # Hitting the ceiling
 					me.y = stone_wall.bb.bottom + me.image.height * me.factor_y
@@ -62,14 +62,14 @@ class Enemy < GameObject
 				end
 			end
 		end
-		self.each_collision($game_bridges) do |me, bridge|
-			if collision_at?(me.x, me.y)
-				if self.velocity_y > 0
-					me.velocity_y = Module_Game::Environment::GRAV_WHEN_LAND
-					me.y = bridge.bb.top - 1 unless me.y > bridge.y
-				end
-			end
-		end
+		#~ self.each_collision($game_bridges) do |me, bridge|
+			#~ if collision_at?(me.x, me.y)
+				#~ if self.velocity_y > 0
+					#~ me.velocity_y = Module_Game::Environment::GRAV_WHEN_LAND
+					#~ me.y = bridge.bb.top - 1 unless me.y > bridge.y
+				#~ end
+			#~ end
+		#~ end
 	end
 	
 	def check_collision
@@ -82,7 +82,7 @@ class Enemy < GameObject
 		self.each_collision(Sword, Axe, Rang, Knife) do |enemy, weapon|
 			if collision_at?(enemy.x, enemy.y)
 				unless enemy.invincible
-					enemy.hit(weapon)
+					enemy.hit(weapon, weapon.x - (weapon.x - enemy.x) - (@player.factor_x*(enemy.width/4)), weapon.y - (weapon.y - enemy.y) - (enemy.height*3/5))
 					#~ Spark.create(:x => enemy.x - weapon.x + weapon.width, :y =>  enemy.y - weapon.y + weapon.height, :angle => 30*@player.factor_x)
 					weapon.die if weapon.is_a?(Knife)
 				end
@@ -373,11 +373,11 @@ class Zombie < Enemy
 	def die
 		# pause!
 		if @hp <= 0
-			i = rand(2)
-			case i
-				when 1
-				Ammo.create(:x => self.x, :y => self.y)
-			end
+			#~ i = rand(2)
+			#~ case i
+				#~ when 1
+				#~ Ammo.create(:x => self.x, :y => self.y)
+			#~ end
 			Misc_Flame.create(:x => self.x-6*self.factor_x, :y => self.y-(self.height/4) )
 			after(50){ Misc_Flame.create(:x => self.x+6*self.factor_x, :y => self.y-(self.height)/2) }
 			after(100){ Misc_Flame.create(:x => self.x, :y => self.y-(self.height*6/10))}

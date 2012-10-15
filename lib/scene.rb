@@ -25,9 +25,25 @@ class Scene < GameState
 		@area = [0,0]
 		#~ @file = File.join(ROOT, "levels/#{self.class.to_s.downcase}.yml")
 		@file = File.join(ROOT, "#{self.class.to_s.downcase}.yml")
+		@tiles = []
+		@recorded_tilemap = nil
 		$window.clear_cache
+		#~ $window.set_terrains
 		game_objects.select { |game_object| !game_object.is_a? Player }.each { |game_object| game_object.destroy }
 		load_game_objects(:file => @file) unless self.class.to_s == "Zero"
+		#~ for i in 0...$game_tiles.size
+			#~ @tiles = game_objects.grep($game_tiles[i])
+		#~ end
+		#~ p game_objects
+		for i in 0...$game_terrains.size
+			#~ j = game_objects.grep($game_terrains[i])
+			@tiles += game_objects.grep($game_terrains[i])
+		end
+		#~ @tiles = game_objects.grep(Ground)
+		#~ @tiles += game_objects.grep(GroundTiled)
+		game_objects.subtract_with(@tiles)
+		#~ p @tiles
+		#~ p game_objects
 		#~ between(200,400) {
 		#~ @player.move_right
 		#~ }.then { @player.stand_still; $window.stop_transferring }
@@ -45,18 +61,28 @@ class Scene < GameState
 		#~ p "#{Module_Game::BGM[$window.map.current_level]}.ogg"
 		#~ p "#{Module_Game::BGM}"
 		@hud.update
+		#~ @tiles = @game_objects.grep(Ground)
 	end
 	
 	def draw
 		#~ @backdrop.draw
 		@hud.draw unless @hud == nil
-		# Get Chingu to draw all your dynamic sprites normally.
+		# Draw the static tilemap all at once and ONLY once.
+		@recorded_tilemap ||= $window.record 1, 1 do
+			@tiles.each &:draw
+		end
+		@recorded_tilemap.draw 0, 0, 0
+
 		super
 	end
 	
 	def edit
-
-		push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Zombie, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM, BridgeGraySmall, BridgeGrayLeftSmall, BridgeGrayRightSmall, BridgeGrayPoleSmall, BridgeGrayMidSmall, Zombie, Ball_Rang, Ball,Ground] ))
+		#~ push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Zombie, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM, BridgeGraySmall, BridgeGrayLeftSmall, BridgeGrayRightSmall, BridgeGrayPoleSmall, BridgeGrayMidSmall, Zombie, Ball_Rang, Ball,Ground] ))
+		push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Zombie, Ball, Ball_Knife, Ball_Rang, Ball_Axe, Ground, GroundTiled, GroundLower, GroundLoop, GroundBack] ))
+	end
+	
+	def clear_game_terrains
+		@tiles.each {|me| me.destroy}
 	end
 	
 	def restart
@@ -64,6 +90,7 @@ class Scene < GameState
 		#~ $window.block = 1
 		#~ $window.setup_player
 		$window.reset_stage
+		clear_game_terrains
 	end
 	
 	def player_start
@@ -95,23 +122,6 @@ class Scene < GameState
 		#~ after(100) { $window.stop_transferring }
 	end
 	
-	#~ def solid_pixel_at?(x, y)
-		#~ begin     
-		  #~ @backdrop.layers.last.get_pixel(x, y)[3] != 0
-		#~ rescue
-		  #~ puts "Error in get_pixel(#{x}, #{y})"
-		#~ end
-	#~ end
-	
-	#~ def solid?
-		#~ return solid_pixel_at?(@player.x, @player.y) && solid_pixel_at?(@player.x + 1, @player.y)
-	#~ end
-	
-	#~ def center_around
-		#~ self.viewport.x = @player.x - $window.o_width / 2
-		#~ self.viewport.y = @player.y - $window.o_height / 2
-	#~ end
-	
 	def update
 		super
 		@hud.update
@@ -142,7 +152,7 @@ class Level00 < Scene
 		super
 		#~ @area = [592,288]
 		#~ @area = [592, 416]
-		@area = [592, 288]
+		@area = [384, 288]
 		#~ @area = [592, 288]
 		@player.x = 64
 		@player.y = 247

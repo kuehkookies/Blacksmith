@@ -20,7 +20,8 @@ class Items < GameObject
 	def update
 		@velocity_y = Module_Game::Environment::GRAV_CAP if @velocity_y > Module_Game::Environment::GRAV_CAP
 		unless destroyed?
-			self.each_collision($game_terrains, $game_bridges) do |me, stone_wall|
+			#~ self.each_collision($game_terrains, $game_bridges) do |me, stone_wall|
+			self.each_collision(*$game_terrains, *$game_bridges) do |me, stone_wall|
 				unless me.y > stone_wall.y
 					me.y = stone_wall.bb.top - 1
 					@acceleration_y = 0

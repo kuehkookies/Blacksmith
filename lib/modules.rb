@@ -14,6 +14,7 @@ module Module_Game
 	end
 	
 	INVULNERABLE_DURATION = 350
+	ALLOWED_SUBWEAPON_THROWN = 3
 
 	BGM =[
 		#~ "silence-of-daylight",
@@ -23,6 +24,16 @@ module Module_Game
 end
 
 module Chingu
+	class GameObjectList
+		def grep(*object)
+			result = @game_objects.grep(*object)
+			return result
+		end
+		def subtract_with(object)
+			@game_objects -= object
+		end
+	end
+
 	class Viewport
 		def center_around(object)
 			self.x = object.x - ($window.width - 272) / 2

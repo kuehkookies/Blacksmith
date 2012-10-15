@@ -1,19 +1,19 @@
 # SciTE session file
 
 buffer.1.path=D:\Ruby Box\Blacksmith\main.rb
-buffer.1.position=1
+buffer.1.position=1998
 
 buffer.2.path=D:\Ruby Box\Blacksmith\lib\enemies.rb
-buffer.2.position=1
+buffer.2.position=1386
 
 buffer.3.path=D:\Ruby Box\Blacksmith\lib\game_states.rb
 buffer.3.position=1
 
 buffer.4.path=D:\Ruby Box\Blacksmith\lib\hud.rb
-buffer.4.position=1
+buffer.4.position=1173
 
 buffer.5.path=D:\Ruby Box\Blacksmith\lib\items.rb
-buffer.5.position=1
+buffer.5.position=386
 
 buffer.6.path=D:\Ruby Box\Blacksmith\lib\map.rb
 buffer.6.position=1
@@ -22,17 +22,17 @@ buffer.7.path=D:\Ruby Box\Blacksmith\lib\misc.rb
 buffer.7.position=1
 
 buffer.8.path=D:\Ruby Box\Blacksmith\lib\modules.rb
-buffer.8.position=1
+buffer.8.position=572
 
 buffer.9.path=D:\Ruby Box\Blacksmith\lib\player.rb
-buffer.9.position=1239
+buffer.9.position=6377
 
 buffer.10.path=D:\Ruby Box\Blacksmith\lib\scene.rb
-buffer.10.position=1
+buffer.10.position=2091
 
 buffer.11.path=D:\Ruby Box\Blacksmith\lib\terrains.rb
-buffer.11.position=1
+buffer.11.position=227
 
 buffer.12.path=D:\Ruby Box\Blacksmith\lib\weapons.rb
-buffer.12.position=1
+buffer.12.position=378
 buffer.12.current=1

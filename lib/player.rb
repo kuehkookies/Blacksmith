@@ -189,6 +189,10 @@ class Player < Chingu::GameObject
 		raise
 	end
 	
+	def limit_subweapon
+		Knife.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN || Axe.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN || Rang.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
+	end
+	
 	def die?
 		return false if $window.hp > 0
 		return true if $window.hp <= 0
@@ -199,8 +203,8 @@ class Player < Chingu::GameObject
 	end
 	
 	def land?
-		self.each_collision($game_terrains) do |me, stone_wall|
-		#~ self.each_collision(Ground) do |me, stone_wall|
+		self.each_collision(*$game_terrains) do |me, stone_wall|
+		#~ self.each_collision(Ground,GroundTiled) do |me, stone_wall|
 			if self.velocity_y < 0  # Hitting the ceiling
 				me.y = stone_wall.bb.bottom + me.image.height * me.factor_y
 				me.velocity_y = 0
@@ -215,17 +219,18 @@ class Player < Chingu::GameObject
 				me.y = stone_wall.bb.top - 1 # unless me.y > stone_wall.y
 			end
 		end
-		self.each_collision($game_bridges) do |me, bridge|
-			if me.y <= bridge.y+2 && me.velocity_y > 0
-				if @status == :hurt
-					hurt
-				else
-					land
-				end
-				me.velocity_y = Module_Game::Environment::GRAV_WHEN_LAND # 1
-				me.y = bridge.bb.top - 1
-			end
-		end
+		#~ self.each_collision($game_bridges) do |me, bridge|
+		#~ self.each_collision(*$game_bridges) do |me, bridge|
+			#~ if me.y <= bridge.y+2 && me.velocity_y > 0
+				#~ if @status == :hurt
+					#~ hurt
+				#~ else
+					#~ land
+				#~ end
+				#~ me.velocity_y = Module_Game::Environment::GRAV_WHEN_LAND # 1
+				#~ me.y = bridge.bb.top - 1
+			#~ end
+		#~ end
 	end
 
 	def knockback(damage)
@@ -300,13 +305,15 @@ class Player < Chingu::GameObject
 			@x += x/2 if @vert_jump
 		end
 		
-		#~ self.each_collision($game_terrains) do |me, stone_wall|
-		self.each_collision(Ground) do |me, stone_wall|
-			@x = previous_x 
-			break
-		end
-		@x = previous_x  if at_edge?
-			
+		#~ unless $game_terrains.empty?
+			#~ self.each_collision($game_terrains) do |me, stone_wall|
+			self.each_collision(Ground) do |me, stone_wall|
+				@x = previous_x 
+				break
+			end
+			@x = previous_x  if at_edge?
+		#~ end
+		
 		@y += y
 	end
 	
@@ -322,7 +329,7 @@ class Player < Chingu::GameObject
 	def fire
 		unless disabled or @action == :raise
 			if holding?(:up) and $window.subweapon != :none
-				unless @action == :attack || @status == :crouch || Knife.size >= 1 || Axe.size >= 1 || Rang.size >= 1 
+				unless @action == :attack || @status == :crouch || limit_subweapon
 					attack_sword if $window.ammo == 0
 					attack_subweapon if $window.ammo != 0
 				end
@@ -450,11 +457,11 @@ class Player < Chingu::GameObject
 				$window.ammo -= 1
 				case $window.subweapon
 					when :knife
-						Knife.create(:x => @x+(10*factor_x), :y => @y-(self.height/2), :velocity => @direction, :factor_x => factor_x) unless Knife.size >= 1
+						Knife.create(:x => @x+(10*factor_x), :y => @y-(self.height/2), :velocity => @direction, :factor_x => factor_x) unless Knife.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
 					when :axe
-						Axe.create(:x => @x+(8*factor_x), :y => @y-(self.height/2)-4, :velocity => @direction, :factor_x => factor_x) unless Axe.size >= 1
+						Axe.create(:x => @x+(8*factor_x), :y => @y-(self.height/2)-4, :velocity => @direction, :factor_x => factor_x) unless Axe.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
 					when :rang
-						Rang.create(:x => @x+(12*factor_x), :y => @y-(self.height/2), :velocity => @direction, :factor_x => factor_x) unless Rang.size >= 1
+						Rang.create(:x => @x+(12*factor_x), :y => @y-(self.height/2), :velocity => @direction, :factor_x => factor_x) unless Rang.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
 				end
 				Sound["sfx/swing.wav"].play
 				}

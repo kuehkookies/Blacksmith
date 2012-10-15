@@ -13,6 +13,8 @@ $game_enemies = []
 $game_hazards = []
 $game_terrains = []
 $game_bridges = []
+$game_misc_tiles = []
+$game_tiles = []
 $game_items = []
 $game_subweapons = []
 
@@ -44,7 +46,7 @@ class Game < Chingu::Window
 		#~ Gosu.enable_undocumented_retrofication
 		setup_player
 		setup_stage
-		#~ set_terrains
+		set_terrains
 		#~ self.factor = 2
 		@transfer = true
 		transitional_game_state(Transitional, :speed => 32)
@@ -83,19 +85,24 @@ class Game < Chingu::Window
 	def setup_player
 		@hp = @maxhp = 16
 		#~ @lives = 3 unless @lives > 0
-		@ammo = 80
+		@ammo = 10
 		@wp_level = 1
 		@subweapon = :none
+	end
+	
+	def set_terrains
+		$game_terrains = Solid.descendants
 	end
 	
 	def clear_cache
 		#~ $game_bgm = nil
 		$game_enemies = []
 		$game_hazards = []
-		$game_terrains = []
+		#~ $game_terrains = []
 		$game_bridges = []
+		$game_tiles = []
 		$game_items = []
-		$game_subweapons.each {|me|me.destroy}
+		$game_subweapons.each {|me|me.destroy} if $game_subweapons != []
 		$game_subweapons = []
 	end
 	
