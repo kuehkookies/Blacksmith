@@ -11,6 +11,7 @@ class Enemy < GameObject
 		@player = parent.player
 		@invincible = false
 		@harmful = true
+		@hardened = false
 		@hp = 0
 		@damage = 0
 		self.zorder = 200
@@ -20,13 +21,14 @@ class Enemy < GameObject
 		#~ $game_enemies << self
 	end
 	
-	def hit(weapon, x, y)
+	def hit(weapon, x, y, side)
 		unless die?
 			# Spark.create(:x => self.x+((self.bb.width*3/5)*-@player.factor_x), :y => self.y-(self.height*1/5), :angle => 30*@player.factor_x)
 			#~ Spark.create(:x => self.x, :y => self.y-@player.height*1/4, :angle => 30*@player.factor_x)
 			#~ Spark.create(:x => self.x - weapon.x + weapon.width, :y =>  self.y - weapon.y + weapon.height, :angle => 30*@player.factor_x)
-			Spark.create(:x => x, :y =>  y, :angle => 30*@player.factor_x)
-			Sound["sfx/hit.wav"].play(0.5)
+			Spark.create(:x => x, :y =>  y, :angle => 30*side)
+			Sound["sfx/hit.wav"].play(0.5) if !@hardened
+			Sound["sfx/klang.wav"].play(0.3) if @hardened
 			@hp -= weapon.damage
 			die
 		end
@@ -82,16 +84,18 @@ class Enemy < GameObject
 		self.each_collision(Sword, Axe, Rang, Knife) do |enemy, weapon|
 			if collision_at?(enemy.x, enemy.y)
 				unless enemy.invincible
-					enemy.hit(weapon, weapon.x - (weapon.x - enemy.x) - (@player.factor_x*(enemy.width/4)), weapon.y - (weapon.y - enemy.y) - (enemy.height*3/5))
+					enemy.hit(weapon, weapon.x - (weapon.x - enemy.x) - (weapon.factor_x*(enemy.width/4)), weapon.y - (weapon.y - enemy.y) - (enemy.height*3/5), weapon.factor_x*30)
 					#~ Spark.create(:x => enemy.x - weapon.x + weapon.width, :y =>  enemy.y - weapon.y + weapon.height, :angle => 30*@player.factor_x)
-					weapon.die if weapon.is_a?(Knife)
+					weapon.die if weapon.is_a?(Knife) and !@hardened
+					weapon.deflect if weapon.is_a?(Axe) or weapon.is_a?(Knife) and @hardened
 				end
 			end
 		end
-		self.each_collision(@player) do |enemy, me|
-			#~ if collision_at?(me.x, me.y)
-			if collision_at?(enemy.x, enemy.y)
-				me.knockback(@damage) unless me.invincible or enemy.die?
+		if @harmful
+			self.each_collision(@player) do |enemy, me|
+				if collision_at?(enemy.x, enemy.y)
+					me.knockback(@damage) unless me.invincible or enemy.die?
+				end
 			end
 		end
 	end

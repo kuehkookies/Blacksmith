@@ -14,7 +14,7 @@ module Module_Game
 	end
 	
 	INVULNERABLE_DURATION = 350
-	ALLOWED_SUBWEAPON_THROWN = 3
+	ALLOWED_SUBWEAPON_THROWN = 1
 
 	BGM =[
 		#~ "silence-of-daylight",

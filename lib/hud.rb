@@ -24,7 +24,7 @@ class HUD < Chingu::GameObject
 		#~ @image.draw(15,15,300)
 		#~ @sub.draw(21,24,301) unless @sub == nil
 		@image.draw(8,8,300)
-		@sub.draw(11,11,299) unless @sub == nil
+		@sub.draw(12,12,299) unless @sub == nil
 		# @bar.draw
 		# @life.draw
 		@ammo.draw

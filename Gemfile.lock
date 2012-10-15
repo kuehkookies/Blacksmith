@@ -1,0 +1,17 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    chingu (0.9rc9)
+      gosu (>= 0.7.45)
+      gosu (>= 0.7.45)
+    gosu (0.7.45-x86-mingw32)
+    texplay (0.4.3-x86-mingw32)
+      gosu (>= 0.7.25)
+
+PLATFORMS
+  x86-mingw32
+
+DEPENDENCIES
+  chingu (~> 0.9rc9)
+  gosu
+  texplay

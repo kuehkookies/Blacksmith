@@ -96,8 +96,9 @@ class Axe < Subweapons
 		@velocity_x *= 2
 		@velocity_y = -7
 		@max_velocity = Module_Game::Environment::GRAV_CAP
+		#~ @acceleration_x = -0.15 # 0.4
 		@acceleration_y = Module_Game::Environment::GRAV_ACC # 0.4
-		@rotation = 10*@velocity_x
+		@rotation = 15*@velocity_x
 		@damage = 5
 		cache_bounding_box
 	end
