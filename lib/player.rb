@@ -32,7 +32,8 @@ class Player < Chingu::GameObject
 			:stead => 20..20,
 			:shoot => 21..23,
 			:crouch_shoot => 24..27,
-			:raise => 28..30
+			:raise => 28..30,
+			:wall_jump => 31..31
 		}
 		@animations[:stand].delay = 50
 		@animations[:stand].bounce = true
@@ -145,11 +146,16 @@ class Player < Chingu::GameObject
 	
 	def jump
 		if @status == :walljump
+			@action = :walljump
 			@jumping = true
 			@y_flag = @y
 			self.factor_x *= -self.factor_x.abs
 			Sound["sfx/jump.wav"].play
-			during(150){
+			between(1,100){ 
+				@image = @animations[:wall_jump].first
+				@velocity_y = 0
+			}.then{@action = :stand}
+			between(100,250){
 				#~ @velocity_x = -20*self.factor_x 
 				#~ @x += 2 * @speed * -self.factor_x
 				#~ @velocity_y = -4

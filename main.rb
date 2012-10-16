@@ -33,7 +33,7 @@ class Game < Chingu::Window
 		#~ super(592,288)
 		#~ super(640,288)
 		#~ super(800,600)
-		super(544,416)
+		super(544,416,false,20)
 		
 		Sound["sfx/swing.wav"]
 		Sound["sfx/klang.wav"]
