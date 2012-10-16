@@ -8,16 +8,16 @@ include Gosu
 
 Dir[File.dirname(__FILE__) + '/lib/*.rb'].each {|file| require file }
 
-$game_bgm = nil
+#~ $game_bgm = nil
 
-$game_enemies = []
-$game_hazards = []
-$game_terrains = []
-$game_bridges = []
-$game_misc_tiles = []
-$game_tiles = []
-$game_items = []
-$game_subweapons = []
+#~ $game_enemies = []
+#~ $game_hazards = []
+#~ $game_terrains = []
+#~ $game_bridges = []
+#~ $game_misc_tiles = []
+#~ $game_tiles = []
+#~ $game_items = []
+#~ $game_subweapons = []
 
 # ------------------------------------------------------
 # Main process
@@ -25,6 +25,7 @@ $game_subweapons = []
 # ------------------------------------------------------
 class Game < Chingu::Window
 	attr_accessor :level, :block, :lives, :hp, :maxhp, :ammo, :wp_level, :subweapon, :map, :transfer
+	attr_accessor :bgm, :enemies, :hazards, :terrains, :bridges, :misc_tiles, :tiles, :items, :subweapons
 	
 	def initialize
 		#~ super(384,288)
@@ -43,24 +44,35 @@ class Game < Chingu::Window
 		
 		Font["runescape_uf_regular.ttf", 16]
 		
+		@bgm = nil
+		@enemies = []
+		@hazards = []
+		@terrains = []
+		@bridges = []
+		@misc_tiles = []
+		@tiles = []
+		@items = []
+		@subweapons = []
+		
 		retrofy # THE classy command!
 		#~ Gosu.enable_undocumented_retrofication
 		setup_player
 		setup_stage
 		set_terrains
+		set_enemies
 		#~ self.factor = 2
 		@transfer = true
 		transitional_game_state(Transitional, :speed => 32)
 		blocks = [
 			[Level00, Level01]
 		]
-		$Game_BGM = Module_Game::BGM[@level]
+		@bgm = Module_Game::BGM[@level]
 		#~ p $Game_BGM
 		@map = Map.new(:map =>blocks, :row => @level-1, :col => @block-1)
 		switch_game_state(@map.current)
 		#~ switch_game_state(Level00)
 		#~ transitional_game_state(Transitional, :speed => 32)
-		# self.caption = "Le Trial"
+		self.caption = "Scene0"
 	end
 	
 	def setup_stage
@@ -92,19 +104,23 @@ class Game < Chingu::Window
 	end
 	
 	def set_terrains
-		$game_terrains = Solid.descendants
+		@terrains = Solid.descendants
+	end
+	
+	def set_enemies
+		@enemies = Enemy.descendants
 	end
 	
 	def clear_cache
 		#~ $game_bgm = nil
-		$game_enemies = []
-		$game_hazards = []
+		@enemies = []
+		@hazards = []
 		#~ $game_terrains = []
-		$game_bridges = []
-		$game_tiles = []
-		$game_items = []
-		$game_subweapons.each {|me|me.destroy} if $game_subweapons != []
-		$game_subweapons = []
+		@bridges = []
+		@tiles = []
+		@items = []
+		@subweapons.each {|me|me.destroy} if @subweapons != []
+		@subweapons = []
 	end
 	
 	def draw

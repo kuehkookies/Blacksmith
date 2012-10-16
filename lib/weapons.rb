@@ -39,11 +39,11 @@ class Subweapons < GameObject
 	
 	def setup
 		@player = parent.player
-		$game_subweapons << self
+		#~ $game_subweapons << self
 	end
 	def die
 		destroy
-		$game_subweapons = []
+		#~ $game_subweapons = []
 	end
 end
 
@@ -74,7 +74,7 @@ class Knife < Subweapons
 	
 	def update
 		@angle += @rotation
-		self.each_collision(*$game_terrains) do |knife, wall|
+		self.each_collision(*$window.terrains) do |knife, wall|
 			knife.deflect
 		end
 	end

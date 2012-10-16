@@ -119,7 +119,7 @@ class Player < Chingu::GameObject
 			}
 			# @y_flag = @y
 		else
-			if @status == :jump
+			if @status == :jump or @status == :walljump
 				@image = @animations[:stand].first unless Sword.size >= 1
 				@status = :stand 
 			elsif @velocity_y >= Module_Game::Environment::GRAV_WHEN_LAND + 1 # 2
@@ -144,25 +144,39 @@ class Player < Chingu::GameObject
 	end
 	
 	def jump
-		return if self.velocity_y > Module_Game::Environment::GRAV_WHEN_LAND # 1
-		return if @status == :crouch or @status == :jump or @status == :hurt or die? or @action != :stand 
-		@status = :jump
-		@jumping = true
-		Sound["sfx/jump.wav"].play
-		#~ jump_add = 0
-		# @velocity_x = -@speed if holding?(:left)
-		# @velocity_x = @speed if holding?(:right)
-		#~ @velocity_y = -9
-		@velocity_y = -4
-		during(150){
-			@vert_jump = true if !holding_any?(:left, :right)
-			if holding?(:z) && @jumping && !disabled
-				@velocity_y = -4  unless @velocity_y <=  -Module_Game::Environment::GRAV_CAP || !@jumping
-				#~ @velocity_y = -9 unless @velocity_y <=  -Module_Game::Environment::GRAV_CAP || !@jumping
-			else
-				@velocity_y = -1 unless !@jumping
-			end
-		}
+		if @status == :walljump
+			@jumping = true
+			@y_flag = @y
+			self.factor_x *= -self.factor_x.abs
+			Sound["sfx/jump.wav"].play
+			during(150){
+				#~ @velocity_x = -20*self.factor_x 
+				#~ @x += 2 * @speed * -self.factor_x
+				#~ @velocity_y = -4
+				@image = @animations[:jump].first
+				@x += 2 * @speed * self.factor_x
+				@velocity_y = -4
+			}.then{@status = :jump; @y_flag = @y}
+		else
+			return if self.velocity_y > Module_Game::Environment::GRAV_WHEN_LAND # 1
+			return if @status == :crouch or @status == :jump or @status == :hurt or die? or @action != :stand 
+			@status = :jump
+			@jumping = true
+			Sound["sfx/jump.wav"].play
+			# @velocity_x = -@speed if holding?(:left)
+			# @velocity_x = @speed if holding?(:right)
+			#~ @velocity_y = -9
+			@velocity_y = -4
+			during(150){
+				@vert_jump = true if !holding_any?(:left, :right)
+				if holding?(:z) && @jumping && !disabled
+					@velocity_y = -4  unless @velocity_y <=  -Module_Game::Environment::GRAV_CAP || !@jumping
+					#~ @velocity_y = -9 unless @velocity_y <=  -Module_Game::Environment::GRAV_CAP || !@jumping
+				else
+					@velocity_y = -1 unless !@jumping
+				end
+			}
+		end
 	end
 	
 	def raise
@@ -203,7 +217,7 @@ class Player < Chingu::GameObject
 	end
 	
 	def land?
-		self.each_collision(*$game_terrains) do |me, stone_wall|
+		self.each_collision(*$window.terrains) do |me, stone_wall|
 		#~ self.each_collision(Ground,GroundTiled) do |me, stone_wall|
 			if self.velocity_y < 0  # Hitting the ceiling
 				me.y = stone_wall.bb.bottom + me.image.height * me.factor_y
@@ -220,17 +234,17 @@ class Player < Chingu::GameObject
 			end
 		end
 		#~ self.each_collision($game_bridges) do |me, bridge|
-		#~ self.each_collision(*$game_bridges) do |me, bridge|
-			#~ if me.y <= bridge.y+2 && me.velocity_y > 0
-				#~ if @status == :hurt
-					#~ hurt
-				#~ else
-					#~ land
-				#~ end
-				#~ me.velocity_y = Module_Game::Environment::GRAV_WHEN_LAND # 1
-				#~ me.y = bridge.bb.top - 1
-			#~ end
-		#~ end
+		self.each_collision(*$window.bridges) do |me, bridge|
+			if me.y <= bridge.y+2 && me.velocity_y > 0
+				if @status == :hurt
+					hurt
+				else
+					land
+				end
+				me.velocity_y = Module_Game::Environment::GRAV_WHEN_LAND # 1
+				me.y = bridge.bb.top - 1
+			end
+		end
 	end
 
 	def knockback(damage)
@@ -295,25 +309,31 @@ class Player < Chingu::GameObject
 		@image = @animations[:hurt].first  if @status == :hurt
 		@image = @animations[:raise].first  if @action == :raise
 		
-		unless @action == :attack || @status == :hurt
+		unless @action == :attack || @status == :hurt || @status == :walljump
 			self.factor_x = self.factor_x.abs   if x > 0
 			self.factor_x = -self.factor_x.abs  if x < 0
 		end
 		
-		unless @action == :raise
+		unless @action == :raise or (@status == :walljump and @jumping)
 			@x += x if !@vert_jump
 			@x += x/2 if @vert_jump
 		end
-		
-		#~ unless $game_terrains.empty?
-			#~ self.each_collision($game_terrains) do |me, stone_wall|
-			self.each_collision(Ground) do |me, stone_wall|
-				@x = previous_x 
-				break
+
+		self.each_collision(*$window.terrains) do |me, stone_wall|
+			@x = previous_x
+			if @jumping and (@y_flag - @y).abs > 8
+				if x < 0 and holding?(:left); @status = :walljump; @jumping = false; end
+				if x > 0 and holding?(:right); @status = :walljump; @jumping = false; end
 			end
-			@x = previous_x  if at_edge?
-		#~ end
+			break
+		end
 		
+		if @x != previous_x and @status == :walljump and !@jumping
+			@status = :jump; @jumping = true
+		end
+		
+		@x = previous_x  if at_edge?
+
 		@y += y
 	end
 	
@@ -486,7 +506,10 @@ class Player < Chingu::GameObject
 			@running = false
 			@animations[:walk].reset
 		end
-		if @status == :jump and @action == :stand
+		#~ if @x == @last_x and (@y_flag - @y).abs > 16 and @jumping #and holding_any?(:left, :right)
+			#~ @status = :walljump
+		#~ end
+		if (@status == :jump or @status == :walljump) and @action == :stand
 			if @last_y > @y 
 				@image = @animations[:jump].first
 				@image = @animations[13] if @vert_jump

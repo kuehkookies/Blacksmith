@@ -7,6 +7,10 @@ class Enemy < GameObject
 	traits :collision_detection, :effect, :velocity, :timer
 	attr_reader :invincible, :hp, :damage, :harmful
 	
+	def self.descendants
+		ObjectSpace.each_object(Class).select { |klass| klass < self }
+	end
+	
 	def setup
 		@player = parent.player
 		@invincible = false
@@ -53,7 +57,7 @@ class Enemy < GameObject
 	end
 	
 	def land?
-		self.each_collision(*$game_terrains) do |me, stone_wall|
+		self.each_collision(*$window.terrains) do |me, stone_wall|
 			if collision_at?(me.x, me.y)
 				if self.velocity_y < 0  # Hitting the ceiling
 					me.y = stone_wall.bb.bottom + me.image.height * me.factor_y
@@ -166,7 +170,7 @@ class Ball_Knife < Ball
 			self.collidable = false; @factor_x += 0.1; @factor_y += 0.1; @color.alpha -= 10 
 		}.then {
 			destroy
-			$game_enemies.delete(self) rescue nil
+			#~ $window.enemies.delete(self) rescue nil
 			Item_Knife.create(:x => self.x, :y => self.y)
 		}
 	end
@@ -188,7 +192,7 @@ class Ball_Axe < Ball
 			self.collidable = false; @factor_x += 0.1; @factor_y += 0.1; @color.alpha -= 10 
 		}.then {
 			destroy
-			$game_enemies.delete(self) rescue nil
+			#~ $window.enemies.delete(self) rescue nil
 			Item_Axe.create(:x => self.x, :y => self.y)
 		}
 	end
@@ -210,7 +214,7 @@ class Ball_Sword < Ball
 			self.collidable = false; @factor_x += 0.1; @factor_y += 0.1; @color.alpha -= 10 
 		}.then {
 			destroy
-			$game_enemies.delete(self) rescue nil
+			#~ $window.enemies.delete(self) rescue nil
 			Item_Sword.create(:x => self.x, :y => self.y)
 		}
 	end
@@ -232,7 +236,7 @@ class Ball_Rang < Ball
 			self.collidable = false; @factor_x += 0.1; @factor_y += 0.1; @color.alpha -= 10 
 		}.then {
 			destroy
-			$game_enemies.delete(self) rescue nil
+			#~ $window.enemies.delete(self) rescue nil
 			Item_Rang.create(:x => self.x, :y => self.y)
 		}
 	end

@@ -13,7 +13,7 @@ class Items < GameObject
 		@max_velocity = 8
 		self.zorder = 300
 		self.rotation_center = :bottom_center
-		$game_items << self
+		$window.items << self
 		cache_bounding_box
 	end
 	
@@ -21,7 +21,7 @@ class Items < GameObject
 		@velocity_y = Module_Game::Environment::GRAV_CAP if @velocity_y > Module_Game::Environment::GRAV_CAP
 		unless destroyed?
 			#~ self.each_collision($game_terrains, $game_bridges) do |me, stone_wall|
-			self.each_collision(*$game_terrains, *$game_bridges) do |me, stone_wall|
+			self.each_collision(*$window.terrains, *$window.bridges) do |me, stone_wall|
 				unless me.y > stone_wall.y
 					me.y = stone_wall.bb.top - 1
 					@acceleration_y = 0
@@ -32,7 +32,7 @@ class Items < GameObject
 				item.die # unless destroyed?
 					if item.is_a?(Item_Sword)
 						# parent.push_game_state(Pause_Event) unless @player.wp_level > 3
-						$game_enemies.each { |enemy| 
+						$window.enemies.each { |enemy| 
 							enemy.pause! unless $window.wp_level > 3 # or enemy.paused?
 							# after(500) {enemy.unpause!}
 						}

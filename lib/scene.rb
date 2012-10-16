@@ -19,15 +19,15 @@ class Scene < GameState
 		super
 		self.input = { :escape => :exit, :e => :edit, :r => :restart, :space => Pause }
 		@backdrop = Parallax.new(:rotation_center => :top_left, :zorder => 10)
-		player_start
-		@hud = HUD.create(:player => @player) # if @hud == nil
-		@player.sword = nil
 		@area = [0,0]
 		#~ @file = File.join(ROOT, "levels/#{self.class.to_s.downcase}.yml")
 		@file = File.join(ROOT, "#{self.class.to_s.downcase}.yml")
 		@tiles = []
 		@recorded_tilemap = nil
 		$window.clear_cache
+		player_start
+		@hud = HUD.create(:player => @player) # if @hud == nil
+		@player.sword = nil
 		#~ $window.set_terrains
 		game_objects.select { |game_object| !game_object.is_a? Player }.each { |game_object| game_object.destroy }
 		load_game_objects(:file => @file) unless self.class.to_s == "Zero"
@@ -35,9 +35,9 @@ class Scene < GameState
 			#~ @tiles = game_objects.grep($game_tiles[i])
 		#~ end
 		#~ p game_objects
-		for i in 0...$game_terrains.size
+		for i in 0...$window.terrains.size
 			#~ j = game_objects.grep($game_terrains[i])
-			@tiles += game_objects.grep($game_terrains[i])
+			@tiles += game_objects.grep($window.terrains[i])
 		end
 		#~ @tiles = game_objects.grep(Ground)
 		#~ @tiles += game_objects.grep(GroundTiled)
@@ -94,10 +94,7 @@ class Scene < GameState
 	end
 	
 	def player_start
-		#~ @player = $game_player == nil ?  Player.create() : $game_player
 		@player = Player.create()
-		# @hud = HUD.create(:player => @player) if @hud == nil
-		#~ after(100){@player.status = :stand; @player.action = :stand}
 		@player.reset_state
 	end
 	
@@ -127,7 +124,7 @@ class Scene < GameState
 		@hud.update
 		#~ update_trait
 		self.viewport.center_around(@player)
-		$game_enemies.each { |enemy| 
+		$window.enemies.each { |enemy| 
 			if enemy.paused?
 				after(500) {enemy.unpause!}
 			end
@@ -142,8 +139,8 @@ class Scene < GameState
 		if @player.y > self.viewport.y + $window.height/2 + @player.height/2
 			@player.dead 
 		end
-		$window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}, #{self.viewport.game_area}"
-		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.status}, #{@player.action}"
+		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}, #{self.viewport.game_area}"
+		$window.caption = "Scene0, FPS: #{$window.fps}, #{@player.status}, #{@player.action}, #{@player.y_flag}"
 	end
 end
 
@@ -161,7 +158,7 @@ class Level00 < Scene
 		@player.y_flag = @player.y
 		self.viewport.game_area = [0,0,@area[0],@area[1]]
 		@backdrop << {:image => "parallax/panorama1-1.png", :damping => 10, :repeat_x => true, :repeat_y => false}
-		@backdrop << {:image => "parallax/bg1-1.png", :damping => 1, :repeat_x => true, :repeat_y => false}
+		@backdrop << {:image => "parallax/bg1-1.png", :damping => 5, :repeat_x => true, :repeat_y => false}
 	
 		#~ every(1){
 			#~ @player.move_right
