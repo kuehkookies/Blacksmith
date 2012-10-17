@@ -20,33 +20,21 @@ class Scene < GameState
 		self.input = { :escape => :exit, :e => :edit, :r => :restart, :space => Pause }
 		@backdrop = Parallax.new(:rotation_center => :top_left, :zorder => 10)
 		@area = [0,0]
-		#~ @file = File.join(ROOT, "levels/#{self.class.to_s.downcase}.yml")
-		@file = File.join(ROOT, "#{self.class.to_s.downcase}.yml")
 		@tiles = []
 		@recorded_tilemap = nil
+		#~ @file = File.join(ROOT, "levels/#{self.class.to_s.downcase}.yml")
+		@file = File.join(ROOT, "#{self.class.to_s.downcase}.yml")
 		$window.clear_cache
 		player_start
 		@hud = HUD.create(:player => @player) # if @hud == nil
 		@player.sword = nil
-		#~ $window.set_terrains
+		clear_game_terrains
 		game_objects.select { |game_object| !game_object.is_a? Player }.each { |game_object| game_object.destroy }
 		load_game_objects(:file => @file) unless self.class.to_s == "Zero"
-		#~ for i in 0...$game_tiles.size
-			#~ @tiles = game_objects.grep($game_tiles[i])
-		#~ end
-		#~ p game_objects
 		for i in 0...$window.terrains.size
-			#~ j = game_objects.grep($game_terrains[i])
 			@tiles += game_objects.grep($window.terrains[i])
 		end
-		#~ @tiles = game_objects.grep(Ground)
-		#~ @tiles += game_objects.grep(GroundTiled)
 		game_objects.subtract_with(@tiles)
-		#~ p @tiles
-		#~ p game_objects
-		#~ between(200,400) {
-		#~ @player.move_right
-		#~ }.then { @player.stand_still; $window.stop_transferring }
 		after(350) { $window.stop_transferring }
 		#~ @song = Gosu::Song.new("media/bgm/silence-of-daylight.ogg")
 		#~ @song.volume = 0.3
@@ -61,7 +49,6 @@ class Scene < GameState
 		#~ p "#{Module_Game::BGM[$window.map.current_level]}.ogg"
 		#~ p "#{Module_Game::BGM}"
 		@hud.update
-		#~ @tiles = @game_objects.grep(Ground)
 	end
 	
 	def draw
@@ -78,7 +65,7 @@ class Scene < GameState
 	
 	def edit
 		#~ push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Zombie, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM, BridgeGraySmall, BridgeGrayLeftSmall, BridgeGrayRightSmall, BridgeGrayPoleSmall, BridgeGrayMidSmall, Zombie, Ball_Rang, Ball,Ground] ))
-		push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Zombie, Ball, Ball_Knife, Ball_Rang, Ball_Axe, Ground, GroundTiled, GroundLower, GroundLoop, GroundBack] ))
+		push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Ground, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM] ))
 	end
 	
 	def clear_game_terrains
@@ -99,6 +86,7 @@ class Scene < GameState
 	end
 	
 	def to_next_block
+		clear_game_terrains
 		@player.status = :blink
 		@player.sword.die if @player.sword != nil
 		$window.transferring
@@ -111,6 +99,7 @@ class Scene < GameState
 	def to_next_level
 		@player.status = :blink
 		@player.sword.die if @player.sword != nil
+		clear_game_terrains
 		$window.transferring
 		#~ $window.block += 1
 		switch_game_state($window.map.next_level)
@@ -140,7 +129,8 @@ class Scene < GameState
 			@player.dead 
 		end
 		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}, #{self.viewport.game_area}"
-		$window.caption = "Scene0, FPS: #{$window.fps}, #{@player.status}, #{@player.action}, #{@player.y_flag}"
+		$window.caption = "Scene0, #{@player.status}, #{@player.action}"
+		#~ $window.caption = "Scene0, FPS: #{$window.fps}"
 	end
 end
 
@@ -149,7 +139,7 @@ class Level00 < Scene
 		super
 		#~ @area = [592,288]
 		#~ @area = [592, 416]
-		@area = [384, 288]
+		@area = [400, 288]
 		#~ @area = [592, 288]
 		@player.x = 64
 		@player.y = 247
@@ -187,13 +177,14 @@ end
 class Level01 < Scene
 	def initialize
 		super
-		@area = [384,288]
-		@player.x = self.viewport.x+(@player.bb.width/2)+16 # 32
-		@player.y = 246
+		@area = [384,320]
+		@player.x = 32 # self.viewport.x+(@player.bb.width/2)+16 # 32
+		@player.y = 278 # 246
 		@player.y_flag = @player.y
 		self.viewport.game_area = [0,0,@area[0],@area[1]]
+		@backdrop.x = 64
 		@backdrop << {:image => "parallax/panorama1-1.png", :damping => 10, :repeat_x => true, :repeat_y => false}
-		@backdrop << {:image => "parallax/bg1-1.png", :damping => 1, :repeat_x => true, :repeat_y => false}
+		@backdrop << {:image => "parallax/bg1-1.png", :damping => 5, :repeat_x => true, :repeat_y => false}
 	
 		#~ $game_bgm = Gosu::Song.new("media/bgm/#{Module_Game::BGM[$window.level-1]}.ogg", :volume => 0.3)
 		#~ $game_bgm.play(true)

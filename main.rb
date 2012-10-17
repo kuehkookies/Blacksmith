@@ -28,12 +28,8 @@ class Game < Chingu::Window
 	attr_accessor :bgm, :enemies, :hazards, :terrains, :bridges, :misc_tiles, :tiles, :items, :subweapons
 	
 	def initialize
-		#~ super(384,288)
-		#~ super(416,288)
-		#~ super(592,288)
-		#~ super(640,288)
-		#~ super(800,600)
-		super(544,416,false,20)
+		#~ super(544,416)
+		super(640,480)
 		
 		Sound["sfx/swing.wav"]
 		Sound["sfx/klang.wav"]
@@ -46,10 +42,9 @@ class Game < Chingu::Window
 		
 		@bgm = nil
 		@enemies = []
-		@hazards = []
 		@terrains = []
 		@bridges = []
-		@misc_tiles = []
+		@decorations = []
 		@tiles = []
 		@items = []
 		@subweapons = []
@@ -105,6 +100,7 @@ class Game < Chingu::Window
 	
 	def set_terrains
 		@terrains = Solid.descendants
+		@decorations = Decoration.descendants
 	end
 	
 	def set_enemies

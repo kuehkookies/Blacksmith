@@ -13,5 +13,5 @@ PLATFORMS
 
 DEPENDENCIES
   chingu (~> 0.9rc9)
-  gosu
+  gosu (~> 0.7.45)
   texplay

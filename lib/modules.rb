@@ -6,7 +6,7 @@
 module Module_Game
 	module Environment
 		GRAV_CAP = 8
-		GRAV_ACC = 0.5
+		GRAV_ACC = 0.4
 		GRAV_WHEN_LAND = 1
 		#~ GRAV_CAP = 16
 		#~ GRAV_ACC = 0.8
@@ -36,8 +36,10 @@ module Chingu
 
 	class Viewport
 		def center_around(object)
-			self.x = object.x - ($window.width - 272) / 2
-			self.y = object.y - ($window.height - 208) / 2
+			#~ self.x = object.x - ($window.width - 272) / 2
+			#~ self.y = object.y - ($window.height - 208) / 2
+			self.x = object.x - ($window.width - 320) / 2
+			self.y = object.y - ($window.height - 240) / 2
 			#~ self.x = object.x - $window.width / 2
 			#~ self.y = object.y - $window.height / 2
 		end

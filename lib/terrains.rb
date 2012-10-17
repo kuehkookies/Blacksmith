@@ -65,17 +65,18 @@ class GroundBack < Decoration;  def setup; super; @color = Color.new(0xff808080)
 #~ end
 
 
-#~ class BridgeGray < GrayBridge; end
-#~ class BridgeGrayLeft < GrayBridge; end
-#~ class BridgeGrayRight < GrayBridge; end
-#~ class BridgeGrayMid < GrayBridge; end
-#~ class BridgeGrayPole < GrayBridgeDeco; end
-#~ class BridgeGrayLL < GrayBridgeDeco; end
-#~ class BridgeGrayLR < GrayBridgeDeco; end
-#~ class BridgeGrayDeco < GrayBridgeDeco; end
-#~ class BridgeGrayDecoL < GrayBridgeDeco; end 
-#~ class BridgeGrayDecoR < GrayBridgeDeco; end 
-#~ class BridgeGrayDecoM < GrayBridgeDeco; end
+class BridgeGray < Bridge; end
+class BridgeGrayLeft < Bridge; end
+class BridgeGrayRight < Bridge; end
+class BridgeGrayMid < Bridge; end
+class BridgeGrayPole < Decoration; end
+class BridgeGrayLL < Decoration; end
+class BridgeGrayLR < Decoration; end
+class BridgeGrayDeco < Decoration; end
+class BridgeGrayDecoL < Decoration; end 
+class BridgeGrayDecoR < Decoration; end 
+class BridgeGrayDecoM < Decoration; end
+
 #~ class BridgeGraySmall < Bridge; end
 #~ class BridgeGrayLeftSmall < Bridge; end
 #~ class BridgeGrayRightSmall < Bridge; end
