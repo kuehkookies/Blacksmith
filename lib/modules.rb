@@ -38,8 +38,8 @@ module Chingu
 		def center_around(object)
 			#~ self.x = object.x - ($window.width - 272) / 2
 			#~ self.y = object.y - ($window.height - 208) / 2
-			self.x = object.x - ($window.width - 320) / 2
-			self.y = object.y - ($window.height - 240) / 2
+			self.x = object.x - ($window.width/2) / 2
+			self.y = object.y - ($window.height/2) / 2
 			#~ self.x = object.x - $window.width / 2
 			#~ self.y = object.y - $window.height / 2
 		end
@@ -59,4 +59,34 @@ module Chingu
 			end
 		end
 	end
+	#~ module Traits
+		#~ module Timer
+			#~ def update_trait
+				#~ ms = Gosu::milliseconds()
+				
+				#~ @_timers.each do |name, start_time, end_time, block|
+				  #~ block.call if ms > start_time && (end_time == nil || ms < end_time) # and !$window.paused
+				#~ end
+						
+				#~ index = 0
+				#~ @_repeating_timers.each do |name, start_time, delay, end_time, block|
+				  #~ if ms > start_time
+					#~ block.call  
+					#~ @_repeating_timers[index] = [name, ms + delay, delay, end_time, block]
+				  #~ end
+				  #~ if end_time && ms > end_time
+					#~ @_repeating_timers.delete_at index
+				  #~ else
+					#~ index += 1
+				  #~ end
+				#~ end
+
+				#~ # Remove one-shot timers (only a start_time, no end_time) and all timers which have expired
+				#~ @_timers.reject! { |name, start_time, end_time, block| (ms > start_time && end_time == nil) || (end_time != nil && ms > end_time) }
+		  
+			#~ super
+		  #~ end
+		  
+		#~ end
+	#~ end	
 end

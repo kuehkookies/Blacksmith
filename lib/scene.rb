@@ -1,12 +1,3 @@
-#~ module Chingu
-	#~ class Viewport
-		#~ def center_around(object)
-			#~ self.x = object.x - $window.width / 2
-			#~ self.y = object.y - $window.height / 2
-		#~ end
-	#~ end
-#~ end
-
 # ------------------------------------------------------
 # Scenes
 # What's happening in each blocks?
@@ -17,7 +8,8 @@ class Scene < GameState
 
 	def initialize
 		super
-		self.input = { :escape => :exit, :e => :edit, :r => :restart, :space => Pause }
+		#~ self.input = { :escape => :exit, :e => :edit, :r => :restart, :space => Pause }
+		self.input = { :escape => :exit, :e => :edit, :r => :restart, :space => :pause }
 		@backdrop = Parallax.new(:rotation_center => :top_left, :zorder => 10)
 		@area = [0,0]
 		@tiles = []
@@ -31,8 +23,11 @@ class Scene < GameState
 		clear_game_terrains
 		game_objects.select { |game_object| !game_object.is_a? Player }.each { |game_object| game_object.destroy }
 		load_game_objects(:file => @file) unless self.class.to_s == "Zero"
-		for i in 0...$window.terrains.size
+		for i in 0..$window.terrains.size
 			@tiles += game_objects.grep($window.terrains[i])
+		end
+		for i in 0..$window.decorations.size
+			@tiles += game_objects.grep($window.decorations[i])
 		end
 		game_objects.subtract_with(@tiles)
 		after(350) { $window.stop_transferring }
@@ -65,7 +60,7 @@ class Scene < GameState
 	
 	def edit
 		#~ push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Zombie, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM, BridgeGraySmall, BridgeGrayLeftSmall, BridgeGrayRightSmall, BridgeGrayPoleSmall, BridgeGrayMidSmall, Zombie, Ball_Rang, Ball,Ground] ))
-		push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Ground, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM] ))
+		push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Reaper, Ground, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM] ))
 	end
 	
 	def clear_game_terrains
@@ -73,11 +68,14 @@ class Scene < GameState
 	end
 	
 	def restart
-		#~ switch_game_state($window.map.first_block)
-		#~ $window.block = 1
-		#~ $window.setup_player
 		$window.reset_stage
 		clear_game_terrains
+	end
+	
+	def pause
+		$window.paused = true
+		game_objects.each { |game_object| game_object.pause }
+		push_game_state(Pause)
 	end
 	
 	def player_start
@@ -86,6 +84,7 @@ class Scene < GameState
 	end
 	
 	def to_next_block
+		wait(10)
 		clear_game_terrains
 		@player.status = :blink
 		@player.sword.die if @player.sword != nil
@@ -108,11 +107,21 @@ class Scene < GameState
 		#~ after(100) { $window.stop_transferring }
 	end
 	
+	def wait(duration)
+		@wait = true
+		for i in 0..duration
+			update
+			@wait = false if i >= duration
+		end
+	end
+	
 	def update
 		super
+		#~ update_trait unless $window.paused
 		@hud.update
 		#~ update_trait
 		self.viewport.center_around(@player)
+		game_objects.each { |game_object| game_object.unpause } if !$window.paused
 		$window.enemies.each { |enemy| 
 			if enemy.paused?
 				after(500) {enemy.unpause!}
@@ -129,7 +138,7 @@ class Scene < GameState
 			@player.dead 
 		end
 		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}, #{self.viewport.game_area}"
-		$window.caption = "Scene0, #{@player.status}, #{@player.action}"
+		#~ $window.caption = "Scene0, #{@player.status}, #{@player.action}"
 		#~ $window.caption = "Scene0, FPS: #{$window.fps}"
 	end
 end
@@ -139,17 +148,16 @@ class Level00 < Scene
 		super
 		#~ @area = [592,288]
 		#~ @area = [592, 416]
-		@area = [400, 288]
-		#~ @area = [592, 288]
+		#~ @area = [400, 288]
+		@area = [400, 304]
 		@player.x = 64
-		@player.y = 247
-		#~ @player.y = 246
-		#~ @player.y = 360
+		@player.y = 272
 		@player.y_flag = @player.y
 		self.viewport.game_area = [0,0,@area[0],@area[1]]
+		self.viewport.y = 64
+		@backdrop.camera_y = self.viewport.y.to_i
 		@backdrop << {:image => "parallax/panorama1-1.png", :damping => 10, :repeat_x => true, :repeat_y => false}
 		@backdrop << {:image => "parallax/bg1-1.png", :damping => 5, :repeat_x => true, :repeat_y => false}
-	
 		#~ every(1){
 			#~ @player.move_right
 		#~ }
@@ -165,11 +173,10 @@ class Level00 < Scene
 	 
 	def update
 		super
-		#~ @player.move_right
-		if @player.x >= @area[0]-(@player.bb.width) && (@player.y > 245 && @player.y < 248)
+		if @player.x >= @area[0]-(@player.bb.width) and !@wait
 			to_next_block
 		end
-		@backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i, self.viewport.y.to_i
+		@backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i,self.viewport.y.to_i
 		@backdrop.update
 	end
 end
@@ -178,11 +185,11 @@ class Level01 < Scene
 	def initialize
 		super
 		@area = [384,320]
-		@player.x = 32 # self.viewport.x+(@player.bb.width/2)+16 # 32
-		@player.y = 278 # 246
+		@player.x = 16 # self.viewport.x+(@player.bb.width/2)+16 # 32
+		@player.y = 280 # 246
 		@player.y_flag = @player.y
 		self.viewport.game_area = [0,0,@area[0],@area[1]]
-		@backdrop.x = 64
+		self.viewport.y = 80
 		@backdrop << {:image => "parallax/panorama1-1.png", :damping => 10, :repeat_x => true, :repeat_y => false}
 		@backdrop << {:image => "parallax/bg1-1.png", :damping => 5, :repeat_x => true, :repeat_y => false}
 	
@@ -200,7 +207,6 @@ class Level01 < Scene
 		#~ if @player.x >= @area[0]-(@player.bb.width) && (@player.y > 214 && @player.y < 216) # self.viewport.x+$window.width-(@player.bb.width/2)-1
 			#~ to_next_block
 		#~ end
-		#~ @backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i, self.viewport.y.to_i
 		@backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i, self.viewport.y.to_i
 		@backdrop.update
 	end

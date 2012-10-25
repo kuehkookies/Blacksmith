@@ -37,6 +37,10 @@ class Subweapons < GameObject
 	traits :collision_detection, :timer, :velocity
 	attr_accessor :damage
 	
+	def self.descendants
+		ObjectSpace.each_object(Class).select { |klass| klass < self }
+	end
+	
 	def setup
 		@player = parent.player
 		#~ $game_subweapons << self

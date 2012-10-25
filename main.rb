@@ -25,7 +25,8 @@ Dir[File.dirname(__FILE__) + '/lib/*.rb'].each {|file| require file }
 # ------------------------------------------------------
 class Game < Chingu::Window
 	attr_accessor :level, :block, :lives, :hp, :maxhp, :ammo, :wp_level, :subweapon, :map, :transfer
-	attr_accessor :bgm, :enemies, :hazards, :terrains, :bridges, :misc_tiles, :tiles, :items, :subweapons
+	attr_accessor :bgm, :enemies, :hazards, :terrains, :bridges, :decorations, :tiles, :items, :subweapons
+	attr_accessor :paused
 	
 	def initialize
 		#~ super(544,416)
@@ -48,13 +49,14 @@ class Game < Chingu::Window
 		@tiles = []
 		@items = []
 		@subweapons = []
+		@paused = false
 		
 		retrofy # THE classy command!
-		#~ Gosu.enable_undocumented_retrofication
 		setup_player
 		setup_stage
 		set_terrains
 		set_enemies
+		set_subweapons
 		#~ self.factor = 2
 		@transfer = true
 		transitional_game_state(Transitional, :speed => 32)
@@ -107,6 +109,10 @@ class Game < Chingu::Window
 		@enemies = Enemy.descendants
 	end
 	
+	def set_subweapons
+		@subweapons = Subweapons.descendants
+	end
+	
 	def clear_cache
 		#~ $game_bgm = nil
 		@enemies = []
@@ -115,8 +121,9 @@ class Game < Chingu::Window
 		@bridges = []
 		@tiles = []
 		@items = []
-		@subweapons.each {|me|me.destroy} if @subweapons != []
-		@subweapons = []
+		#~ @subweapons.each {|me|me.destroy}
+		#~ @subweapons.each {|me|me.destroy} if @subweapons != []
+		#~ @subweapons = []
 	end
 	
 	def draw

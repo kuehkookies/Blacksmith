@@ -18,6 +18,7 @@ class Pause < GameState
 	end
 	def unpause
 		pop_game_state(:setup => false)
+		$window.paused = false
 	end
 end
 

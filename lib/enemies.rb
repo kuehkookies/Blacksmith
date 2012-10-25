@@ -30,7 +30,7 @@ class Enemy < GameObject
 			# Spark.create(:x => self.x+((self.bb.width*3/5)*-@player.factor_x), :y => self.y-(self.height*1/5), :angle => 30*@player.factor_x)
 			#~ Spark.create(:x => self.x, :y => self.y-@player.height*1/4, :angle => 30*@player.factor_x)
 			#~ Spark.create(:x => self.x - weapon.x + weapon.width, :y =>  self.y - weapon.y + weapon.height, :angle => 30*@player.factor_x)
-			Spark.create(:x => x, :y =>  y, :angle => 30*side)
+			Spark.create(:x => weapon.x - (weapon.x - @x) - 8, :y =>  weapon.y - (weapon.y - @y) - 4, :angle => 30*side)
 			Sound["sfx/hit.wav"].play(0.5) if !@hardened
 			Sound["sfx/klang.wav"].play(0.3) if @hardened
 			@hp -= weapon.damage
@@ -632,12 +632,12 @@ end
 
 class Reaper < Enemy
 	#~ trait :bounding_box, :scale => [0.3, 0.75], :debug => true
-	trait :bounding_box,  :scale => [0.5, 0.75], :debug => false
+	trait :bounding_box,  :scale => [0.5, 0.75], :debug => true
 	def setup
 		super
 		@animations = Chingu::Animation.new(:file => "enemies/reaper.png", :size => [44,49])
-		#~ @scite = Reaper_Scite.create(:x => @x+(18*@factor_x), :y => @y - 13, :velocity => @direction, :zorder => self.zorder + 1)
-		@scite = Reaper_Scite.create(:x => @x+(36*@factor_x), :y => @y - 26, :velocity => @direction, :zorder => self.zorder + 1)
+		@scite = Reaper_Scite.create(:x => @x+(18*@factor_x), :y => @y - 13, :velocity => @direction, :zorder => self.zorder + 1)
+		#~ @scite = Reaper_Scite.create(:x => @x+(36*@factor_x), :y => @y - 26, :velocity => @direction, :zorder => self.zorder + 1)
 		@animations.frame_names = {
 			:fly =>  0..2
 		}
@@ -679,12 +679,12 @@ class Reaper < Enemy
 		during(1750) { 
 			#~ self.velocity_y += 0.1
 			#~ self.velocity_y = 2 if self.velocity_y > 2
-			if @x > $window.width + parent.viewport.x - 60
+			if @x > $window.width / 2 + parent.viewport.x - 16
 				self.velocity_x -= 0.2
 			elsif @x < 60
 				self.velocity_x += 0.2
 			end
-			if @y > $window.height + parent.viewport.y - 60
+			if @y > $window.height / 2 + parent.viewport.y - 16
 				@direction = :upward
 				self.velocity_y -= 0.2
 			elsif @y < $window.height / 2
@@ -716,7 +716,7 @@ class Reaper < Enemy
 			@factor_x = $window.factor unless @status != :idle
 		end
 		@scite.x = @x+(18*@factor_x)
-		@scite.y = @y-25
+		@scite.y = @y-12
 		@scite.factor_x = @factor_x
 		
 		#~ unless @x < 60 || @x > parent.viewport.x + $window.width - 60

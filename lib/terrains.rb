@@ -19,10 +19,6 @@ class Block < GameObject
   def self.descendants
 	  ObjectSpace.each_object(Class).select { |klass| klass < self }
   end
-  
-  def self.x
-	  @x
-  end
 
   def setup
     # @image = Image["block-block.png"]

@@ -156,15 +156,12 @@ class Player < Chingu::GameObject
 				@velocity_y = 0
 			}.then{@status = :jump; @jumping = true; Sound["sfx/jump.wav"].play}
 			between(100,250){
-				#~ @velocity_x = -20*self.factor_x 
-				#~ @x += 2 * @speed * -self.factor_x
-				#~ @velocity_y = -4
 				@image = @animations[:jump].first
 				unless !@jumping
 					@x += 2 * @speed * self.factor_x 
 					@velocity_y = -4
 				end
-			}.then{@action = :stand; @velocity_y = -3; @y_flag = @y}
+			}.then{@action = :stand; @velocity_y = -2; @y_flag = @y}
 		else
 			return if self.velocity_y > Module_Game::Environment::GRAV_WHEN_LAND # 1
 			return if @status == :crouch or @status == :jump or @status == :hurt or die? or @action != :stand or @status == :walljump
@@ -430,7 +427,7 @@ class Player < Chingu::GameObject
 		}
 		between(75,175) {
 			unless disabled or @action == :raise
-				@sword.x = @x-(4*factor)
+				@sword.x = @x+(10*factor_x)
 				#~ @sword.x = @x-(20*(-factor_x/2))
 				@sword.y = (@y-(self.height/2)-1)
 				@sword.y = (@y-(self.height/2)+4) if @status == :crouch # or @status == :jump

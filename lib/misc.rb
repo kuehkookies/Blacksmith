@@ -64,7 +64,6 @@ class Hazard < GameObject
 	
 	def setup
 		@player = parent.player
-		#~ $game_hazards << self
 	end
 	
 	def die
@@ -72,19 +71,19 @@ class Hazard < GameObject
 	end
 
 	def update
-		#~ self.each_collision(@player) do |enemy, me|
-			#~ me.knockback(@damage) unless me.invincible # or (enemy.is_a? Enemy and enemy.hp <= 0)
-		#~ end
 		self.each_collision(@player) do |enemy, me|
-			if collision_at?(me.x, me.y)
-				me.knockback(@damage) unless me.invincible 
-			end
+			me.knockback(@damage) unless me.invincible # or (enemy.is_a? Enemy and enemy.hp <= 0)
 		end
+		#~ self.each_collision(@player) do |enemy, me|
+			#~ if collision_at?(me.x, me.y)
+				#~ me.knockback(@damage) unless me.invincible 
+			#~ end
+		#~ end
 	end
 end
 
 class Ghoul_Sword < Hazard
-	trait :bounding_box, :scale => [1, 0.5], :debug => false
+	trait :bounding_box, :debug => false
 	
 	def setup
 		super
@@ -96,7 +95,7 @@ class Ghoul_Sword < Hazard
 		@damage = 4
 		@rotation = 0
 		@color = Color.new(0xff88DD44)
-		# cache_bounding_box
+		cache_bounding_box
 	end
 	
 	def die
@@ -143,5 +142,13 @@ class Reaper_Scite < Hazard
 		@damage = 4
 		#~ @collidable = false
 		self.rotation_center = :center
+	end
+	
+	def update
+		self.each_collision(@player) do |enemy, me|
+			if collision_at?(me.x, me.y)
+				me.knockback(@damage) unless me.invincible 
+			end
+		end
 	end
 end
