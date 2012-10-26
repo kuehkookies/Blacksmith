@@ -21,6 +21,7 @@ class Scene < GameState
 		@hud = HUD.create(:player => @player) # if @hud == nil
 		@player.sword = nil
 		clear_game_terrains
+		clear_subweapon_projectile
 		game_objects.select { |game_object| !game_object.is_a? Player }.each { |game_object| game_object.destroy }
 		load_game_objects(:file => @file) unless self.class.to_s == "Zero"
 		for i in 0..$window.terrains.size
@@ -67,7 +68,12 @@ class Scene < GameState
 		@tiles.each {|me| me.destroy}
 	end
 	
+	def clear_subweapon_projectile
+		$window.subweapons.each {|me|me.destroy_all}
+	end
+	
 	def restart
+		clear_subweapon_projectile
 		$window.reset_stage
 		clear_game_terrains
 	end
@@ -84,7 +90,7 @@ class Scene < GameState
 	end
 	
 	def to_next_block
-		wait(10)
+		#~ $window.wait(10)
 		clear_game_terrains
 		@player.status = :blink
 		@player.sword.die if @player.sword != nil
@@ -107,14 +113,6 @@ class Scene < GameState
 		#~ after(100) { $window.stop_transferring }
 	end
 	
-	def wait(duration)
-		@wait = true
-		for i in 0..duration
-			update
-			@wait = false if i >= duration
-		end
-	end
-	
 	def update
 		super
 		#~ update_trait unless $window.paused
@@ -128,11 +126,11 @@ class Scene < GameState
 			end
 		}
 		Knife.destroy_if {|knife| 
-			knife.x > self.viewport.x + $window.width + $window.width/8 or 
-			knife.x < self.viewport.x - + $window.width/8 or 
+			knife.x > self.viewport.x + $window.width/2 + $window.width/16 or 
+			knife.x < self.viewport.x - $window.width/16 or 
 			self.viewport.outside_game_area?(knife)
 		}
-		Axe.destroy_if {|axe| axe.y > self.viewport.y + $window.height or axe.x < self.viewport.x or axe.x > self.viewport.x + $window.width}
+		Axe.destroy_if {|axe| axe.y > self.viewport.y + $window.height/2 or axe.x < self.viewport.x or axe.x > self.viewport.x + $window.width/2}
 		Rang.destroy_if {|rang| self.viewport.outside_game_area?(rang) and rang.turn_back }
 		if @player.y > self.viewport.y + $window.height/2 + @player.height/2
 			@player.dead 
@@ -155,7 +153,6 @@ class Level00 < Scene
 		@player.y_flag = @player.y
 		self.viewport.game_area = [0,0,@area[0],@area[1]]
 		self.viewport.y = 64
-		@backdrop.camera_y = self.viewport.y.to_i
 		@backdrop << {:image => "parallax/panorama1-1.png", :damping => 10, :repeat_x => true, :repeat_y => false}
 		@backdrop << {:image => "parallax/bg1-1.png", :damping => 5, :repeat_x => true, :repeat_y => false}
 		#~ every(1){
@@ -173,8 +170,10 @@ class Level00 < Scene
 	 
 	def update
 		super
-		if @player.x >= @area[0]-(@player.bb.width) and !@wait
-			to_next_block
+		if @player.x >= @area[0]-(@player.bb.width) # and !$window.waiting
+			$window.in_event = true
+			@player.move(2,0)
+			after(250){to_next_block; $window.in_event = false}
 		end
 		@backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i,self.viewport.y.to_i
 		@backdrop.update

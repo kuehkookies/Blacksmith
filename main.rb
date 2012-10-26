@@ -26,7 +26,7 @@ Dir[File.dirname(__FILE__) + '/lib/*.rb'].each {|file| require file }
 class Game < Chingu::Window
 	attr_accessor :level, :block, :lives, :hp, :maxhp, :ammo, :wp_level, :subweapon, :map, :transfer
 	attr_accessor :bgm, :enemies, :hazards, :terrains, :bridges, :decorations, :tiles, :items, :subweapons
-	attr_accessor :paused
+	attr_accessor :paused, :waiting, :in_event
 	
 	def initialize
 		#~ super(544,416)
@@ -50,6 +50,8 @@ class Game < Chingu::Window
 		@items = []
 		@subweapons = []
 		@paused = false
+		@waiting = false
+		@in_event = false
 		
 		retrofy # THE classy command!
 		setup_player
@@ -79,8 +81,8 @@ class Game < Chingu::Window
 	
 	def reset_stage
 		transferring
-		switch_game_state($window.map.first_block)
 		setup_player
+		switch_game_state($window.map.first_block)
 		@block = 1
 	end
 	
@@ -111,6 +113,7 @@ class Game < Chingu::Window
 	
 	def set_subweapons
 		@subweapons = Subweapons.descendants
+		#~ @subweapons = [Knife, Axe, Rang]
 	end
 	
 	def clear_cache
@@ -121,9 +124,16 @@ class Game < Chingu::Window
 		@bridges = []
 		@tiles = []
 		@items = []
-		#~ @subweapons.each {|me|me.destroy}
 		#~ @subweapons.each {|me|me.destroy} if @subweapons != []
 		#~ @subweapons = []
+	end
+	
+	def wait(duration)
+		@waiting = true
+		for i in 0..duration
+			update
+			@waiting = false if i >= duration
+		end
 	end
 	
 	def draw

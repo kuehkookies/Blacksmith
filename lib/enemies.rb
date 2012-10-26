@@ -30,7 +30,7 @@ class Enemy < GameObject
 			# Spark.create(:x => self.x+((self.bb.width*3/5)*-@player.factor_x), :y => self.y-(self.height*1/5), :angle => 30*@player.factor_x)
 			#~ Spark.create(:x => self.x, :y => self.y-@player.height*1/4, :angle => 30*@player.factor_x)
 			#~ Spark.create(:x => self.x - weapon.x + weapon.width, :y =>  self.y - weapon.y + weapon.height, :angle => 30*@player.factor_x)
-			Spark.create(:x => weapon.x - (weapon.x - @x) - 8, :y =>  weapon.y - (weapon.y - @y) - 4, :angle => 30*side)
+			Spark.create(:x => x, :y =>  y, :angle => 30*side)
 			Sound["sfx/hit.wav"].play(0.5) if !@hardened
 			Sound["sfx/klang.wav"].play(0.3) if @hardened
 			@hp -= weapon.damage
@@ -88,7 +88,11 @@ class Enemy < GameObject
 		self.each_collision(Sword, Axe, Rang, Knife) do |enemy, weapon|
 			if collision_at?(enemy.x, enemy.y)
 				unless enemy.invincible
-					enemy.hit(weapon, weapon.x - (weapon.x - enemy.x) - (weapon.factor_x*(enemy.width/4)), weapon.y - (weapon.y - enemy.y) - (enemy.height*3/5), weapon.factor_x*30)
+					if !weapon.is_a?(Sword)
+						enemy.hit(weapon, weapon.x, weapon.y, weapon.factor_x*30)
+					else
+						enemy.hit(weapon, weapon.x - (weapon.x - enemy.x) - (weapon.factor_x*(enemy.width/4)), weapon.y - (weapon.y - enemy.y) - (enemy.height*3/5), weapon.factor_x*30)
+					end
 					#~ Spark.create(:x => enemy.x - weapon.x + weapon.width, :y =>  enemy.y - weapon.y + weapon.height, :angle => 30*@player.factor_x)
 					weapon.die if weapon.is_a?(Knife) and !@hardened
 					weapon.deflect if weapon.is_a?(Axe) or weapon.is_a?(Knife) and @hardened
@@ -401,7 +405,7 @@ class Zombie < Enemy
 end
 
 class Ghoul < Enemy
-	trait :bounding_box, :scale => [1, 0.7], :debug => false
+	trait :bounding_box, :scale => [0.5, 0.7], :debug => false
 	def setup
 		super
 		@animations = Chingu::Animation.new(:file => "enemies/ghouls.png", :size => [32,32])

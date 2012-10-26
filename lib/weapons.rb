@@ -43,11 +43,10 @@ class Subweapons < GameObject
 	
 	def setup
 		@player = parent.player
-		#~ $game_subweapons << self
 	end
+	
 	def die
 		destroy
-		#~ $game_subweapons = []
 	end
 end
 
@@ -119,6 +118,8 @@ class Axe < Subweapons
 		@acceleration_y = 0.5
 		@collidable = false
 	end
+	
+	def die;super;end
 end
 
 class Rang < Subweapons
@@ -144,4 +145,5 @@ class Rang < Subweapons
 		after(1500) {@turn_back = true}
 		@angle += @rotation
 	end
+	def die;super;end
 end
