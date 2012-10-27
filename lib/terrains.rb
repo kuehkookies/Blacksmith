@@ -40,11 +40,23 @@ class Ground < Solid; end
 class GroundLower < Solid; end
 class GroundLoop < Solid; end
 class GroundTiled < Solid; end
+class Brick < Solid; end
 
 class Bridge < Block; end
+class BridgeGray < Bridge; end
+class BridgeGrayLeft < Bridge; end
+class BridgeGrayRight < Bridge; end
+class BridgeGrayMid < Bridge; end
 
 class Decoration < Block; end
 class GroundBack < Decoration;  def setup; super; @color = Color.new(0xff808080); end; end
+class BridgeGrayPole < Decoration; end
+class BridgeGrayLL < Decoration; end
+class BridgeGrayLR < Decoration; end
+class BridgeGrayDeco < Decoration; end
+class BridgeGrayDecoL < Decoration; end 
+class BridgeGrayDecoR < Decoration; end 
+class BridgeGrayDecoM < Decoration; end
 
 #~ class GrayBridge < Bridge
   #~ def setup
@@ -59,19 +71,6 @@ class GroundBack < Decoration;  def setup; super; @color = Color.new(0xff808080)
 	#~ @color = Color.new(0xFFC7BA8E)
   #~ end
 #~ end
-
-
-class BridgeGray < Bridge; end
-class BridgeGrayLeft < Bridge; end
-class BridgeGrayRight < Bridge; end
-class BridgeGrayMid < Bridge; end
-class BridgeGrayPole < Decoration; end
-class BridgeGrayLL < Decoration; end
-class BridgeGrayLR < Decoration; end
-class BridgeGrayDeco < Decoration; end
-class BridgeGrayDecoL < Decoration; end 
-class BridgeGrayDecoR < Decoration; end 
-class BridgeGrayDecoM < Decoration; end
 
 #~ class BridgeGraySmall < Bridge; end
 #~ class BridgeGrayLeftSmall < Bridge; end

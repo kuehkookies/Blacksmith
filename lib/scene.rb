@@ -27,6 +27,9 @@ class Scene < GameState
 		for i in 0..$window.terrains.size
 			@tiles += game_objects.grep($window.terrains[i])
 		end
+		for i in 0..$window.bridges.size
+			@tiles += game_objects.grep($window.bridges[i])
+		end
 		for i in 0..$window.decorations.size
 			@tiles += game_objects.grep($window.decorations[i])
 		end
@@ -61,7 +64,7 @@ class Scene < GameState
 	
 	def edit
 		#~ push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Zombie, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM, BridgeGraySmall, BridgeGrayLeftSmall, BridgeGrayRightSmall, BridgeGrayPoleSmall, BridgeGrayMidSmall, Zombie, Ball_Rang, Ball,Ground] ))
-		push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Reaper, Ground, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM] ))
+		push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Ground, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGray, BridgeGrayLeft, BridgeGrayMid, BridgeGrayRight, BridgeGrayPole, BridgeGrayLL, BridgeGrayLR, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM] ))
 	end
 	
 	def clear_game_terrains
@@ -132,11 +135,11 @@ class Scene < GameState
 		}
 		Axe.destroy_if {|axe| axe.y > self.viewport.y + $window.height/2 or axe.x < self.viewport.x or axe.x > self.viewport.x + $window.width/2}
 		Rang.destroy_if {|rang| self.viewport.outside_game_area?(rang) and rang.turn_back }
-		if @player.y > self.viewport.y + $window.height/2 + @player.height/2
+		if @player.y > self.viewport.y + $window.height/2 + (2*@player.height)
 			@player.dead 
 		end
 		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}, #{self.viewport.game_area}"
-		#~ $window.caption = "Scene0, #{@player.status}, #{@player.action}"
+		$window.caption = "Scene0, #{@player.status}, #{@player.action}"
 		#~ $window.caption = "Scene0, FPS: #{$window.fps}"
 	end
 end
@@ -144,21 +147,15 @@ end
 class Level00 < Scene
 	def initialize
 		super
-		#~ @area = [592,288]
-		#~ @area = [592, 416]
-		#~ @area = [400, 288]
-		@area = [400, 304]
+		@area = [512, 304]
+		self.viewport.game_area = [0,0,@area[0],@area[1]]
+		self.viewport.y = 64
 		@player.x = 64
 		@player.y = 272
 		@player.y_flag = @player.y
-		self.viewport.game_area = [0,0,@area[0],@area[1]]
-		self.viewport.y = 64
 		@backdrop << {:image => "parallax/panorama1-1.png", :damping => 10, :repeat_x => true, :repeat_y => false}
 		@backdrop << {:image => "parallax/bg1-1.png", :damping => 5, :repeat_x => true, :repeat_y => false}
-		#~ every(1){
-			#~ @player.move_right
-		#~ }
-	
+		update
 		#~ $game_bgm = Gosu::Song.new("media/bgm/#{Module_Game::BGM[$window.level-1]}.ogg", :volume => 0.3)
 		#~ $game_bgm.play(true)
 	end
@@ -170,12 +167,15 @@ class Level00 < Scene
 	 
 	def update
 		super
-		if @player.x >= @area[0]-(@player.bb.width) # and !$window.waiting
+		if @player.x >= @area[0]-(@player.bb.width) - 4 and @player.idle # and !$window.waiting
 			$window.in_event = true
 			@player.move(2,0)
-			after(250){to_next_block; $window.in_event = false}
+			if @player.x >= @area[0] + 32
+				to_next_block; $window.in_event = false
+			end
 		end
-		@backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i,self.viewport.y.to_i
+		#~ @backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i,self.viewport.y.to_i
+		@backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i, self.viewport.y.to_i
 		@backdrop.update
 	end
 end
@@ -183,15 +183,15 @@ end
 class Level01 < Scene
 	def initialize
 		super
-		@area = [384,320]
+		@area = [640,304]
 		@player.x = 16 # self.viewport.x+(@player.bb.width/2)+16 # 32
-		@player.y = 280 # 246
+		@player.y = 272 # 246
 		@player.y_flag = @player.y
 		self.viewport.game_area = [0,0,@area[0],@area[1]]
 		self.viewport.y = 80
 		@backdrop << {:image => "parallax/panorama1-1.png", :damping => 10, :repeat_x => true, :repeat_y => false}
 		@backdrop << {:image => "parallax/bg1-1.png", :damping => 5, :repeat_x => true, :repeat_y => false}
-	
+		update
 		#~ $game_bgm = Gosu::Song.new("media/bgm/#{Module_Game::BGM[$window.level-1]}.ogg", :volume => 0.3)
 		#~ $game_bgm.play(true)
 	end

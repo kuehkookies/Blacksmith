@@ -3,7 +3,8 @@
 # When you need self-defense
 # ------------------------------------------------------
 class Sword < GameObject
-	trait :bounding_box, :scale => [1, 0.25], :debug => false
+	#~ trait :bounding_box, :scale => [1, 0.25], :debug => false
+	trait :bounding_box, :debug => false
 	traits :collision_detection, :timer, :velocity
 	attr_reader :damage
 	attr_accessor :zorder
@@ -17,7 +18,7 @@ class Sword < GameObject
 		@velocity_x *= 1
 		@velocity_y *= -1 if self.velocity_y > 0
 		@velocity_y *= 1
-		@collidable = false
+		#~ @collidable = false
 		@damage = $window.wp_level*2
 		@damage = 4 if $window.wp_level >= 3
 		cache_bounding_box
@@ -139,9 +140,9 @@ class Rang < Subweapons
 	def update
 		# between(1,2000){@velocity_x -= 0.01*self.factor_x;}
 		# after(2000) {@turn_back = true}
-		after(100) {@velocity_y = -0.35}
-		after(750) {@velocity_y = 0.35}
-		between(1,1500){@velocity_x -= 0.005*self.factor_x}
+		after(100) {@velocity_y = -0.25}
+		after(750) {@velocity_y = 0.25}
+		between(1,1500){@velocity_x -= 0.003*self.factor_x}
 		after(1500) {@turn_back = true}
 		@angle += @rotation
 	end

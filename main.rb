@@ -25,7 +25,7 @@ Dir[File.dirname(__FILE__) + '/lib/*.rb'].each {|file| require file }
 # ------------------------------------------------------
 class Game < Chingu::Window
 	attr_accessor :level, :block, :lives, :hp, :maxhp, :ammo, :wp_level, :subweapon, :map, :transfer
-	attr_accessor :bgm, :enemies, :hazards, :terrains, :bridges, :decorations, :tiles, :items, :subweapons
+	attr_accessor :bgm, :enemies, :hazards, :terrains, :bridges, :decorations, :items, :subweapons
 	attr_accessor :paused, :waiting, :in_event
 	
 	def initialize
@@ -46,7 +46,6 @@ class Game < Chingu::Window
 		@terrains = []
 		@bridges = []
 		@decorations = []
-		@tiles = []
 		@items = []
 		@subweapons = []
 		@paused = false
@@ -71,7 +70,7 @@ class Game < Chingu::Window
 		switch_game_state(@map.current)
 		#~ switch_game_state(Level00)
 		#~ transitional_game_state(Transitional, :speed => 32)
-		self.caption = "Scene0"
+		#~ self.caption = "Scene0"
 	end
 	
 	def setup_stage
@@ -104,6 +103,7 @@ class Game < Chingu::Window
 	
 	def set_terrains
 		@terrains = Solid.descendants
+		@bridges = Bridge.descendants
 		@decorations = Decoration.descendants
 	end
 	
@@ -120,9 +120,6 @@ class Game < Chingu::Window
 		#~ $game_bgm = nil
 		@enemies = []
 		@hazards = []
-		#~ $game_terrains = []
-		@bridges = []
-		@tiles = []
 		@items = []
 		#~ @subweapons.each {|me|me.destroy} if @subweapons != []
 		#~ @subweapons = []
