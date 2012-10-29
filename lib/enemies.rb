@@ -85,13 +85,13 @@ class Enemy < GameObject
 				#~ weapon.die if weapon.is_a?(Knife)
 			#~ end
 		#~ end
-		self.each_collision(Sword, Axe, Rang, Knife) do |enemy, weapon|
+		self.each_collision(Sword, *$window.subweapons) do |enemy, weapon|
 			if collision_at?(enemy.x, enemy.y)
 				unless enemy.invincible
 					if !weapon.is_a?(Sword)
 						enemy.hit(weapon, weapon.x, weapon.y, weapon.factor_x*30)
 					else
-						enemy.hit(weapon, weapon.x - (weapon.x - enemy.x) - (weapon.factor_x*(enemy.width/4)), weapon.y - (weapon.y - enemy.y) - (enemy.height*3/5), weapon.factor_x*30)
+						enemy.hit(weapon, weapon.x - (weapon.x - enemy.x) - (weapon.factor_x*(enemy.width/4)), weapon.y - (weapon.y - enemy.y) - (enemy.height*3/5), weapon.factor_x*30) # unless weapon.is_a?(Torch) and weapon.on_ground
 					end
 					#~ Spark.create(:x => enemy.x - weapon.x + weapon.width, :y =>  enemy.y - weapon.y + weapon.height, :angle => 30*@player.factor_x)
 					weapon.die if weapon.is_a?(Knife) and !@hardened
@@ -468,7 +468,7 @@ class Ghoul < Enemy
 		destroy if self.parent.viewport.outside_game_area?(self)
 		check_collision
 		
-		if @gap_x.abs < 64 and @gap_y.abs < 32
+		if @gap_x.abs < 32 and @gap_y.abs < 32
 			attack unless @action == :attack
 		end
 		
@@ -489,7 +489,8 @@ class Ghoul < Enemy
 				@x += 0
 				unless die? or @action == :attack
 					@sword.x = @x+(3*@sword.factor_x)
-					@sword.y = @y-6 
+					@sword.y = @y-6
+					@sword.factor_x = @factor_x
 				end
 				after(400){
 					@last_x = @x

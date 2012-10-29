@@ -62,6 +62,10 @@ class Hazard < GameObject
 	attr_reader :damage
 	attr_accessor :zorder
 	
+	def self.descendants
+		ObjectSpace.each_object(Class).select { |klass| klass < self }
+	end
+	
 	def setup
 		@player = parent.player
 	end
@@ -110,7 +114,7 @@ class Ghoul_Sword < Hazard
 	
 	def update
 		super
-		self.bb.x = @x unless self.bb.x == @x 
+		#~ self.bb.x = @x unless self.bb.x == @x 
 		@angle += @rotation
 	end
 end

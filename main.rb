@@ -26,7 +26,7 @@ Dir[File.dirname(__FILE__) + '/lib/*.rb'].each {|file| require file }
 class Game < Chingu::Window
 	attr_accessor :level, :block, :lives, :hp, :maxhp, :ammo, :wp_level, :subweapon, :map, :transfer
 	attr_accessor :bgm, :enemies, :hazards, :terrains, :bridges, :decorations, :items, :subweapons
-	attr_accessor :paused, :waiting, :in_event
+	attr_accessor :paused, :waiting, :in_event, :passing_door
 	
 	def initialize
 		#~ super(544,416)
@@ -43,6 +43,7 @@ class Game < Chingu::Window
 		
 		@bgm = nil
 		@enemies = []
+		@hazards = []
 		@terrains = []
 		@bridges = []
 		@decorations = []
@@ -51,6 +52,7 @@ class Game < Chingu::Window
 		@paused = false
 		@waiting = false
 		@in_event = false
+		@passing_door = false
 		
 		retrofy # THE classy command!
 		setup_player
@@ -105,15 +107,16 @@ class Game < Chingu::Window
 		@terrains = Solid.descendants
 		@bridges = Bridge.descendants
 		@decorations = Decoration.descendants
+		@items = Items.descendants
 	end
 	
 	def set_enemies
 		@enemies = Enemy.descendants
+		@hazards = Hazard.descendants
 	end
 	
 	def set_subweapons
 		@subweapons = Subweapons.descendants
-		#~ @subweapons = [Knife, Axe, Rang]
 	end
 	
 	def clear_cache
@@ -121,8 +124,6 @@ class Game < Chingu::Window
 		@enemies = []
 		@hazards = []
 		@items = []
-		#~ @subweapons.each {|me|me.destroy} if @subweapons != []
-		#~ @subweapons = []
 	end
 	
 	def wait(duration)

@@ -36,12 +36,8 @@ module Chingu
 
 	class Viewport
 		def center_around(object)
-			#~ self.x = object.x - ($window.width - 272) / 2
-			#~ self.y = object.y - ($window.height - 208) / 2
 			self.x = object.x - ($window.width/2) / 2
 			self.y = object.y - ($window.height/2) / 2
-			#~ self.x = object.x - $window.width / 2
-			#~ self.y = object.y - $window.height / 2
 		end
 		def x=(x)
 			@x = x

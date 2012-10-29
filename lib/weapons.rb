@@ -98,7 +98,7 @@ class Axe < Subweapons
 		@image = Image["weapons/ax.gif"]
 		@zorder = 300
 		@velocity_x *= 2
-		@velocity_y = -7
+		@velocity_y -= 7
 		@max_velocity = Module_Game::Environment::GRAV_CAP
 		#~ @acceleration_x = -0.15 # 0.4
 		@acceleration_y = Module_Game::Environment::GRAV_ACC # 0.4
@@ -121,6 +121,102 @@ class Axe < Subweapons
 	end
 	
 	def die;super;end
+end
+
+class Axe_Rang < Subweapons
+	attr_accessor :turn_back, :damage
+	def setup
+		super
+		@image = Image["weapons/ax.gif"]
+		@zorder = 300
+		@velocity_x *= 2
+		@velocity_y = 0
+		@rotation = 15*@velocity_x
+		@max_velocity = 1
+		@damage = 4
+		cache_bounding_box
+	end
+	
+	def update
+		between(1,1500){@velocity_x -= 0.007*self.factor_x}
+		after(1500) {@turn_back = true}
+		@angle += @rotation
+	end
+	def die;super;end
+end
+
+class Torch < Subweapons
+	attr_accessor :damage, :on_ground
+	
+	def setup
+		super
+		@image = Image["weapons/torch.gif"]
+		@zorder = 300
+		@velocity_x *= 5
+		@velocity_y = 0
+		@acceleration_y = 1
+		@max_velocity = 8
+		@rotation = 30
+		@damage = 2
+		@on_ground = false
+		every(50){Torch_Fire.create(:x => @x, :y => @y) if @on_ground }
+		cache_bounding_box
+	end
+	
+	def lit_fire
+		@velocity_x = 0
+		@image = nil
+		after(70){@on_ground = true}
+		after(500){die}
+	end
+	
+	def update
+		@angle += @rotation
+		self.each_collision(*$window.terrains, *$window.bridges) do |me, wall|
+			if collision_at?(me.x, me.y)
+				if self.velocity_y < 0  # Hitting the ceiling
+					me.y = wall.bb.bottom + me.image.height * me.factor_y
+					me.velocity_y = 0
+				else  
+					me.velocity_y = Module_Game::Environment::GRAV_WHEN_LAND
+					me.y = wall.bb.top - 1 unless me.y > wall.y
+				end
+				lit_fire
+			end
+		end
+		unless @on_ground
+			self.each_collision(*$window.enemies) do |me, enemy|
+				lit_fire
+			end
+		end
+		@velocity_x = 3*self.factor_x if @on_ground # and !self.collides?(*$window.terrains)
+	end
+	
+	def die;super;end
+end
+
+class Torch_Fire < Subweapons
+	traits :timer
+	attr_accessor :damage
+	
+	def setup
+		super
+		@fire = Chingu::Animation.new( :file => "misc/fire-torch.gif", :size => [16,20])
+		@fire.delay = 30
+		#~ self.mode = :additive
+		#~ self.factor = 2
+		self.zorder = 500
+		@image = @fire.first
+		@damage = 2
+		self.rotation_center = :bottom_center
+	end
+	
+	def update
+		@image = @fire.next
+		#~ after(20){@image = @spark.next}
+		#~ after(40){@image = @spark.last}
+		after(150){die}
+	end
 end
 
 class Rang < Subweapons

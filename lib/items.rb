@@ -6,6 +6,10 @@ class Items < GameObject
   trait :bounding_box, :debug => false
   traits :collision_detection, :velocity, :timer
 	
+	def self.descendants
+		ObjectSpace.each_object(Class).select { |klass| klass < self }
+	end
+	
 	def setup
 		@image = Image["items/#{self.filename}.gif"]
 		@player = parent.player

@@ -69,9 +69,12 @@ class Scene < GameState
 	
 	def clear_game_terrains
 		@tiles.each {|me| me.destroy}
+		$window.hazards.each {|me|me.destroy_all}
+		$window.items.each {|me|me.destroy_all}
 	end
 	
 	def clear_subweapon_projectile
+		Sword.destroy_all
 		$window.subweapons.each {|me|me.destroy_all}
 	end
 	
@@ -121,7 +124,7 @@ class Scene < GameState
 		#~ update_trait unless $window.paused
 		@hud.update
 		#~ update_trait
-		self.viewport.center_around(@player)
+		self.viewport.center_around(@player) unless $window.passing_door
 		game_objects.each { |game_object| game_object.unpause } if !$window.paused
 		$window.enemies.each { |enemy| 
 			if enemy.paused?
@@ -135,12 +138,13 @@ class Scene < GameState
 		}
 		Axe.destroy_if {|axe| axe.y > self.viewport.y + $window.height/2 or axe.x < self.viewport.x or axe.x > self.viewport.x + $window.width/2}
 		Rang.destroy_if {|rang| self.viewport.outside_game_area?(rang) and rang.turn_back }
+		Axe_Rang.destroy_if {|axerang| self.viewport.outside_game_area?(axerang) and axerang.turn_back }
 		if @player.y > self.viewport.y + $window.height/2 + (2*@player.height)
 			@player.dead 
 		end
-		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}, #{self.viewport.game_area}"
-		$window.caption = "Scene0, #{@player.status}, #{@player.action}"
-		#~ $window.caption = "Scene0, FPS: #{$window.fps}"
+		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}"
+		#~ $window.caption = "Scene0, #{@player.status}, #{@player.action}"
+		$window.caption = "Scene0, FPS: #{$window.fps}"
 	end
 end
 
@@ -174,8 +178,25 @@ class Level00 < Scene
 				to_next_block; $window.in_event = false
 			end
 		end
-		#~ @backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i,self.viewport.y.to_i
-		@backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i, self.viewport.y.to_i
+		
+		#~ if @player.x >= 240 and @player.idle and !@in_other_room
+			#~ $window.in_event = true
+			#~ $window.passing_door = true
+			#~ if self.viewport.x < 160
+				#~ self.viewport.x += 4
+			#~ else
+				#~ if @player.x < 368
+					#~ @player.move(2,0)
+				#~ end
+				#~ if @player.x >= 368
+					#~ @in_other_room = true
+					#~ $window.in_event = false
+					#~ $window.passing_door = false
+				#~ end
+			#~ end
+		#~ end
+		
+		@backdrop.camera_x, @backdrop.camera_y = self.viewport.x.to_i, self.viewport.y.to_i 
 		@backdrop.update
 	end
 end
