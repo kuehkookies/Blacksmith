@@ -8,6 +8,7 @@ class Pause < GameState
 		super
 		self.input = {:space => :unpause}
 		@color = Color.new(0x77000000)
+		#~ $window.stop_transfer
 	end
 	def draw
 		previous_game_state.draw
@@ -17,8 +18,8 @@ class Pause < GameState
 										0,$window.height,@color, Chingu::DEBUG_ZORDER)
 	end
 	def unpause
+		$window.frame = $window.frame_last_tick
 		pop_game_state(:setup => false)
-		$window.paused = false
 	end
 end
 
@@ -82,11 +83,13 @@ class Transitional < Chingu::GameState
       
 	def initialize(new_game_state, options = {})
 		super(options)
-		@options = {:speed => 3, :zorder => INFINITY}.merge(options)
+		#~ @options = {:speed => 3, :zorder => INFINITY}.merge(options)
+		@options = {:speed => 16, :zorder => INFINITY}.merge(options)
 		
 		@new_game_state = new_game_state
 		@new_game_state = new_game_state.new if new_game_state.is_a? Class        
 		#~ p @new_game_state
+		p @new_game_state
 	end
 
 	def setup
@@ -116,6 +119,7 @@ class Transitional < Chingu::GameState
 		
 		@color.alpha = @alpha.to_i
 		@drawn = false
+		
 	end
 	
 	def draw
@@ -137,6 +141,7 @@ class Transitional < Chingu::GameState
 		
 		if @fading_in && @alpha == 0
 			switch_game_state(@new_game_state, :transitional => false)
+			$window.paused = false if @new_game_state == previous_game_state
 		end
 												
 	end

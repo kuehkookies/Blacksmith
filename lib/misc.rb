@@ -16,7 +16,8 @@ class Spark < GameObject
 		@image = @spark.next
 		#~ after(20){@image = @spark.next}
 		#~ after(40){@image = @spark.last}
-		after(70){destroy}
+		#~ after(70){destroy}
+		after(4){destroy}
 	end
 end
 

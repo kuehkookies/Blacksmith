@@ -94,6 +94,7 @@ class Enemy < GameObject
 						enemy.hit(weapon, weapon.x - (weapon.x - enemy.x) - (weapon.factor_x*(enemy.width/4)), weapon.y - (weapon.y - enemy.y) - (enemy.height*3/5), weapon.factor_x*30) # unless weapon.is_a?(Torch) and weapon.on_ground
 					end
 					#~ Spark.create(:x => enemy.x - weapon.x + weapon.width, :y =>  enemy.y - weapon.y + weapon.height, :angle => 30*@player.factor_x)
+					weapon.lit_fire if weapon.is_a?(Torch) and not die?
 					weapon.die if weapon.is_a?(Knife) and !@hardened
 					weapon.deflect if weapon.is_a?(Axe) or weapon.is_a?(Knife) and @hardened
 				end
@@ -433,7 +434,8 @@ class Ghoul < Enemy
 	def attack
 		@action = :attack
 		@animations[:walk].reset
-		between(0,200){
+		#~ between(0,200){
+		between(0,12){
 			unless die?
 				@image = @animations[:attack].first
 				@sword.x, @sword.y = @x+(3*@sword.factor_x), @y-11
@@ -445,13 +447,15 @@ class Ghoul < Enemy
 				@sword.x, @sword.y = @x+(14*@sword.factor_x), @y-13
 			end
 		}
-		after(500){
+		#~ after(500){
+		after(30){
 			unless die?
 				@image = @animations[:walk].first
 				@sword.x, @sword.y = @x+(3*@sword.factor_x), @y-6
 			end
 		}
-		after(1000){@action = :walk unless die?}
+		#~ after(1000){@action = :walk unless die?}
+		after(60){@action = :walk unless die?}
 	end
 	
 	def update
@@ -492,7 +496,8 @@ class Ghoul < Enemy
 					@sword.y = @y-6
 					@sword.factor_x = @factor_x
 				end
-				after(400){
+				#~ after(400){
+				after(24){
 					@last_x = @x
 					@image = @animations[:walk].first if @velocity_y > Module_Game::Environment::GRAV_WHEN_LAND
 				}
@@ -518,7 +523,8 @@ class Ghoul < Enemy
 			@x += 0
 			@y += 0
 			@color.alpha = 128
-			after(300){destroy}
+			#~ after(300){destroy}
+			after(24){destroy}
 		else
 			@invincible = true
 			after(Module_Game::INVULNERABLE_DURATION) { @invincible = false; } # unpause! }

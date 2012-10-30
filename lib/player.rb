@@ -19,7 +19,7 @@ class Player < Chingu::GameObject
 			[:released_left, :released_right, :released_down, :released_up] => :stand,
 			:z => :jump,
 			:x => :fire,
-			#~ :c => :attack_special
+			:c => :change_subweapon
 		}
 		@animations = Chingu::Animation.new( :file => "player/mark.gif", :size => [32,32])
 		@animations.frame_names = {
@@ -48,7 +48,7 @@ class Player < Chingu::GameObject
 		@vert_jump = false
 		@running = false
 		@subattack = false
-		#~ @subweapon = :none
+		@sub = [:knife, :axe, :torch, :rang]
 		
 		self.zorder = 250
 		# @acceleration_y = 0.5
@@ -57,11 +57,13 @@ class Player < Chingu::GameObject
 		self.max_velocity = Module_Game::Environment::GRAV_CAP # 6 # 8
 		self.rotation_center = :bottom_center
 		
-		every(2000){
+		#~ every(2000){
+		every(120){
 			unless die?
 				if @action == :stand && @status == :stand && @last_x == @x
 					#~ p "idle"
-					during(150){
+					#~ during(150){
+					during(9){
 						@image = @animations[:stand].next
 					}.then{@image = @animations[:stand].reset; @image = @animations[:stand].first}
 				end
@@ -189,8 +191,10 @@ class Player < Chingu::GameObject
 	end
 	
 	def land
-		delay = 300
-		delay = 400 if attacking
+		#~ delay = 300
+		#~ delay = 400 if attacking
+		delay = 18
+		delay = 24 if attacking
 		#~ if (@y - @y_flag > 60 or (@y - @y_flag > 44 && @status == :jump ) ) && @status != :die
 		if (@y - @y_flag > 56 or (@y - @y_flag > 48 && jumping ) ) && !die?
 		#~ if (@y - @y_flag > 40) && @status != :die
@@ -241,7 +245,8 @@ class Player < Chingu::GameObject
 			@y_flag = @y
 			self.factor_x *= -self.factor_x.abs
 			@velocity_y = 0
-			between(1,100){ 
+			#~ between(1,100){ 
+			between(1,6){ 
 				@image = @animations[:wall_jump].first
 				@velocity_y = 0
 			}.then{
@@ -252,7 +257,8 @@ class Player < Chingu::GameObject
 				@velocity_x = 4 * self.factor_x  # 2 * @speed * self.factor_x 
 				@velocity_y = -6
 			}
-			after(250){ @action = :stand; @velocity_y = -2; @y_flag = @y; @velocity_x = 0}
+			#~ after(250){ @action = :stand; @velocity_y = -2; @y_flag = @y; @velocity_x = 0}
+			after(15){ @action = :stand; @velocity_y = -2; @y_flag = @y; @velocity_x = 0}
 			#~ }.then{@status = :jump; @jumping = true; Sound["sfx/jump.wav"].play}
 			#~ between(100,250){
 				#~ @image = @animations[:jump].first
@@ -271,7 +277,8 @@ class Player < Chingu::GameObject
 			# @velocity_x = @speed if holding?(:right)
 			#~ @velocity_y = -9
 			@velocity_y = -4
-			during(150){
+			#~ during(150){
+			during(9){
 				@vert_jump = true if !holding_any?(:left, :right)
 				if holding?(:z) && @jumping && !disabled
 					@velocity_y = -4  unless @velocity_y <=  -Module_Game::Environment::GRAV_CAP || !@jumping
@@ -300,7 +307,7 @@ class Player < Chingu::GameObject
 	end
 	
 	def limit_subweapon
-		Knife.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN || Axe.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN || Rang.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
+		Knife.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN || Axe.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN || Torch.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN || Rang.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
 	end
 	
 	def land?
@@ -358,10 +365,12 @@ class Player < Chingu::GameObject
 		@velocity_x = 0
 		@jumping = false
 		if not die?
-			between(1,500) { 
+			#~ between(1,500) { 
+			between(1,30) { 
 				@status = :crouch; crouch
 			}.then { @status = :stand; @image = @animations[:stand].first}
-			between(500,2000){@color.alpha = 128}.then{@invincible = false; @color.alpha = 255}
+			#~ between(500,2000){@color.alpha = 128}.then{@invincible = false; @color.alpha = 255}
+			between(30,120){@color.alpha = 128}.then{@invincible = false; @color.alpha = 255}
 		else
 			dead
 		end
@@ -375,12 +384,15 @@ class Player < Chingu::GameObject
 			#~ crouch
 		@status = :die
 		@image = @animations[:stand].last
-		after(100){@image = @animations[16]}
+		#~ after(100){@image = @animations[16]}
+		after(6){@image = @animations[16]}
 		#~ }.then {
-		after(200){
+		#~ after(200){
+		after(12){
 			@image = @animations[:die].first
 			@x += 8*@factor_x unless @y > ($window.height/2) + parent.viewport.y
-			game_state.after(1500) { 
+			#~ game_state.after(1500) { 
+			game_state.after(180) { 
 				@sword.die if @sword != nil
 				reset_state
 				$window.reset_stage
@@ -397,7 +409,8 @@ class Player < Chingu::GameObject
 		if x != 0 and not (jumping or on_wall)
 			@image = @animations[:step].first if !@running
 			@image = @animations[:walk].next if @running
-			after(50) { @running = true if not @running }
+			#~ after(50) { @running = true if not @running }
+			after(2) { @running = true if not @running }
 		end
 		
 		@image = @animations[:hurt].first  if damaged
@@ -456,13 +469,19 @@ class Player < Chingu::GameObject
 		end
 	end
 	
+	def change_subweapon
+		@sub = @sub.rotate
+		$window.subweapon = @sub[0]
+	end
+	
 	def attack_sword
 		@action = :attack
 		@image = @animations[:shoot].first if not crouching
 		@image = @animations[:crouch_shoot].first if crouching
 		factor = -(self.factor_x^0)
 		@sword = Sword.create(:x => @x+(5*factor), :y => (@y-14), :velocity => @direction, :factor_x => -factor, :angle => 90*(-factor_x))
-		between(1, 20) {
+		#~ between(1, 20) {
+		between(1, 3) {
 			unless disabled or raising_sword
 				@sword.x = @x+(9*(-factor_x))
 				@sword.y = (@y-(self.height/2)-1) if standing
@@ -479,7 +498,8 @@ class Player < Chingu::GameObject
 				@image = @animations[:shoot][1] if not crouching
 			end
 		}
-		between(20,75) {
+		#~ between(20,75) {
+		between(3,5) {
 			unless disabled or raising_sword
 				@sword.x = @x+(7*(-factor_x))
 				@sword.y = (@y-(self.height/2)-3)
@@ -499,8 +519,10 @@ class Player < Chingu::GameObject
 			end
 			@sword.bb.height = (@sword.bb.width)*-1
 			@sword.angle = 130*(-factor_x) unless raising_sword
+			@sword.collidable = true
 		}
-		between(75,175) {
+		#~ between(75,175) {
+		between(5,11) {
 			unless disabled or raising_sword
 				@sword.x = @x+(10*factor_x) # @x+(10*factor_x)
 				@sword.y = (@y-(self.height/2)-2)
@@ -522,7 +544,8 @@ class Player < Chingu::GameObject
 			#~ @sword.bb.width = @sword.bb.width*14/12
 			@sword.bb.height = ((@sword.bb.width*1/10))
 		}
-		between(175, 350) {
+		#~ between(175, 350) {
+		between(11,28) {
 			unless disabled or raising_sword
 				@sword.zorder = self.zorder - 1
 				@sword.x = @x-(13*factor)+((-1)*factor)
@@ -552,25 +575,32 @@ class Player < Chingu::GameObject
 		@action = :attack
 		@subattack = true
 		@image = @animations[:shoot][0]
-		after(50) {@image = @animations[:shoot][1]}
-		after(150) { @image = @animations[:shoot][2]
+		#~ after(50) {@image = @animations[:shoot][1]}
+		between(1,3) {@image = @animations[:shoot][1]}
+		#~ after(150) { @image = @animations[:shoot][2]
+		between(3,9) { @image = @animations[:shoot][2]
 				#~ factor_x = (self.factor_x^0)
 				#~ @ammo -= 1
-				$window.ammo -= 1
-				case $window.subweapon
-					when :knife
-						Knife.create(:x => @x+(10*factor_x), :y => @y-(self.height/2), :velocity => @direction, :factor_x => factor_x) unless Knife.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
-					when :axe
-						Axe.create(:x => @x+(8*factor_x), :y => @y-(self.height/2)-4, :velocity => @direction, :factor_x => factor_x) unless Axe.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
-					when :torch
-						Torch.create(:x => @x+(12*factor_x), :y => @y-(self.height/2), :velocity => @direction, :factor_x => factor_x) unless Torch.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
-					when :rang
-						Rang.create(:x => @x+(12*factor_x), :y => @y-(self.height/2), :velocity => @direction, :factor_x => factor_x) unless Rang.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
-				end
-				Sound["sfx/swing.wav"].play
-				}
-		after(200) { @image = @animations[:shoot].last}
-		after(350) { 
+		}.then{
+			$window.ammo -= 1
+			case $window.subweapon
+				when :knife
+					Knife.create(:x => @x+(10*factor_x), :y => @y-(self.height/2), :velocity => @direction, :factor_x => factor_x) unless Knife.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
+				when :axe
+					Axe.create(:x => @x+(8*factor_x), :y => @y-(self.height/2)-4, :velocity => @direction, :factor_x => factor_x) unless Axe.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
+				when :torch
+					Torch.create(:x => @x+(12*factor_x), :y => @y-(self.height/2), :velocity => @direction, :factor_x => factor_x) unless Torch.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
+				when :rang
+					Rang.create(:x => @x+(12*factor_x), :y => @y-(self.height/2), :velocity => @direction, :factor_x => factor_x) unless Rang.size >= Module_Game::ALLOWED_SUBWEAPON_THROWN
+			end
+			Sound["sfx/swing.wav"].play
+		}
+		#~ after(200) { @image = @animations[:shoot].last}
+		between(9,28) { 
+		#~ after(350) {  
+			@image = @animations[:shoot].last
+			@image = @animations[:crouch_shoot].last if crouching
+		}.then {
 			@action = :stand
 			@status = :stand if steading
 			unless disabled

@@ -27,6 +27,7 @@ class Game < Chingu::Window
 	attr_accessor :level, :block, :lives, :hp, :maxhp, :ammo, :wp_level, :subweapon, :map, :transfer
 	attr_accessor :bgm, :enemies, :hazards, :terrains, :bridges, :decorations, :items, :subweapons
 	attr_accessor :paused, :waiting, :in_event, :passing_door
+	attr_accessor :frame, :frame_last_tick
 	
 	def initialize
 		#~ super(544,416)
@@ -40,6 +41,9 @@ class Game < Chingu::Window
 		Sound["sfx/rifle.ogg"]
 		
 		Font["runescape_uf_regular.ttf", 16]
+		
+		@frame = 0
+		@frame_last_tick = 0
 		
 		@bgm = nil
 		@enemies = []
@@ -72,7 +76,7 @@ class Game < Chingu::Window
 		switch_game_state(@map.current)
 		#~ switch_game_state(Level00)
 		#~ transitional_game_state(Transitional, :speed => 32)
-		#~ self.caption = "Scene0"
+		self.caption = "Scene0"
 	end
 	
 	def setup_stage
@@ -84,15 +88,24 @@ class Game < Chingu::Window
 		transferring
 		setup_player
 		switch_game_state($window.map.first_block)
+		#~ reset_frame
 		@block = 1
 	end
 	
 	def transferring
+		@transfer == true
+	end
+	
+	def start_transfer
 		@transfer = true
 	end
 	
-	def stop_transferring
+	def stop_transfer
 		@transfer = false
+	end
+	
+	def reset_frame
+		@frame = 0
 	end
 	
 	def setup_player
@@ -126,18 +139,15 @@ class Game < Chingu::Window
 		@items = []
 	end
 	
-	def wait(duration)
-		@waiting = true
-		for i in 0..duration
-			update
-			@waiting = false if i >= duration
-		end
-	end
-	
 	def draw
 		scale(2) do
 		   super
 		end
+	end
+	
+	def update
+		@frame += 1 unless @paused
+		super
 	end
 end
 

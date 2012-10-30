@@ -18,7 +18,7 @@ class Sword < GameObject
 		@velocity_x *= 1
 		@velocity_y *= -1 if self.velocity_y > 0
 		@velocity_y *= 1
-		#~ @collidable = false
+		@collidable = false
 		@damage = $window.wp_level*2
 		@damage = 4 if $window.wp_level >= 3
 		cache_bounding_box
@@ -86,7 +86,8 @@ class Knife < Subweapons
 	def die
 		self.collidable = false
 		@velocity_x = 0
-		after(100){super}
+		#~ after(100){super}
+		after(3){super}
 	end
 end
 
@@ -152,28 +153,35 @@ class Torch < Subweapons
 		super
 		@image = Image["weapons/torch.gif"]
 		@zorder = 300
-		@velocity_x *= 5
-		@velocity_y = 0
-		@acceleration_y = 1
+		@velocity_x *= 2
+		@velocity_y = -2
+		@acceleration_y = 0.4
 		@max_velocity = 8
-		@rotation = 30
+		@rotation = 50*self.factor_x
 		@damage = 2
 		@on_ground = false
-		every(50){Torch_Fire.create(:x => @x, :y => @y) if @on_ground }
+		#~ self.rotation_center = :center_bottom
+		every(6){Torch_Fire.create(:x => @x, :y => @y) if @on_ground }
 		cache_bounding_box
 	end
 	
 	def lit_fire
 		@velocity_x = 0
-		@image = nil
-		after(70){@on_ground = true}
-		after(500){die}
+		@velocity_y = 0
+		@color.alpha = 0
+		#~ Torch_Fire.create(:x => @x, :y => @y+10) if !@on_ground
+		#~ after(70){@on_ground = true; Torch_Fire.create(:x => @x, :y => @y) if @on_ground}
+		@on_ground = true # Torch_Fire.create(:x => @x, :y => @y)
+		#~ after(500){die}
+		#~ after(150){die}
+		after(60){die}
 	end
 	
 	def update
 		@angle += @rotation
 		self.each_collision(*$window.terrains, *$window.bridges) do |me, wall|
 			if collision_at?(me.x, me.y)
+				lit_fire if !@on_ground
 				if self.velocity_y < 0  # Hitting the ceiling
 					me.y = wall.bb.bottom + me.image.height * me.factor_y
 					me.velocity_y = 0
@@ -181,15 +189,11 @@ class Torch < Subweapons
 					me.velocity_y = Module_Game::Environment::GRAV_WHEN_LAND
 					me.y = wall.bb.top - 1 unless me.y > wall.y
 				end
-				lit_fire
+				@x = previous_x if (wall.x < me.x or wall.x > me.x) and wall.y < me.y
 			end
+			if @on_ground; @velocity_x = self.factor_x; @acceleration_y = 0.5; end
 		end
-		unless @on_ground
-			self.each_collision(*$window.enemies) do |me, enemy|
-				lit_fire
-			end
-		end
-		@velocity_x = 3*self.factor_x if @on_ground # and !self.collides?(*$window.terrains)
+		#~ if @on_ground; @velocity_x = self.factor_x; @acceleration_y = 0.5; end # and !self.collides?(*$window.terrains)
 	end
 	
 	def die;super;end
@@ -215,7 +219,9 @@ class Torch_Fire < Subweapons
 		@image = @fire.next
 		#~ after(20){@image = @spark.next}
 		#~ after(40){@image = @spark.last}
-		after(150){die}
+		#~ after(150){die}
+		#~ after(24){die}
+		after(36){die}
 	end
 end
 
@@ -236,10 +242,14 @@ class Rang < Subweapons
 	def update
 		# between(1,2000){@velocity_x -= 0.01*self.factor_x;}
 		# after(2000) {@turn_back = true}
-		after(100) {@velocity_y = -0.25}
-		after(750) {@velocity_y = 0.25}
-		between(1,1500){@velocity_x -= 0.003*self.factor_x}
-		after(1500) {@turn_back = true}
+		#~ after(100) {@velocity_y = -0.25}
+		after(15) {@velocity_y = -0.25}
+		#~ after(750) {@velocity_y = 0.25}
+		after(45) {@velocity_y = 0.25}
+		#~ between(1,1500){@velocity_x -= 0.003*self.factor_x}
+		between(1, 75){@velocity_x -= 0.003*self.factor_x}
+		#~ after(1500) {@turn_back = true}
+		after(75) {@turn_back = true}
 		@angle += @rotation
 	end
 	def die;super;end

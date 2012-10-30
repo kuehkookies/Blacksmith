@@ -34,7 +34,8 @@ class Scene < GameState
 			@tiles += game_objects.grep($window.decorations[i])
 		end
 		game_objects.subtract_with(@tiles)
-		after(350) { $window.stop_transferring }
+		#~ after(350) { $window.stop_transferring }
+		after(15) { $window.stop_transfer }
 		#~ @song = Gosu::Song.new("media/bgm/silence-of-daylight.ogg")
 		#~ @song.volume = 0.3
 		#~ @song.play(true)
@@ -70,7 +71,7 @@ class Scene < GameState
 	def clear_game_terrains
 		@tiles.each {|me| me.destroy}
 		$window.hazards.each {|me|me.destroy_all}
-		$window.items.each {|me|me.destroy_all}
+		$window.items.each {|me|me.destroy}
 	end
 	
 	def clear_subweapon_projectile
@@ -80,13 +81,16 @@ class Scene < GameState
 	
 	def restart
 		clear_subweapon_projectile
-		$window.reset_stage
 		clear_game_terrains
+		$window.reset_stage
 	end
 	
 	def pause
+		$window.transfer
 		$window.paused = true
+		$window.frame_last_tick = $window.frame
 		game_objects.each { |game_object| game_object.pause }
+		#~ push_game_state(Pause)
 		push_game_state(Pause)
 	end
 	
@@ -100,7 +104,7 @@ class Scene < GameState
 		clear_game_terrains
 		@player.status = :blink
 		@player.sword.die if @player.sword != nil
-		$window.transferring
+		$window.transfer
 		#~ $window.block += 1
 		switch_game_state($window.map.next_block)
 		$window.block += 1
@@ -111,7 +115,7 @@ class Scene < GameState
 		@player.status = :blink
 		@player.sword.die if @player.sword != nil
 		clear_game_terrains
-		$window.transferring
+		$window.transfer
 		#~ $window.block += 1
 		switch_game_state($window.map.next_level)
 		$window.level += 1
@@ -120,17 +124,13 @@ class Scene < GameState
 	end
 	
 	def update
+		game_objects.each { |game_object| game_object.unpause } if !$window.paused and !$window.transferring
 		super
 		#~ update_trait unless $window.paused
 		@hud.update
 		#~ update_trait
 		self.viewport.center_around(@player) unless $window.passing_door
-		game_objects.each { |game_object| game_object.unpause } if !$window.paused
-		$window.enemies.each { |enemy| 
-			if enemy.paused?
-				after(500) {enemy.unpause!}
-			end
-		}
+		#~ game_objects.each { |game_object| game_object.unpause } # if !$window.paused
 		Knife.destroy_if {|knife| 
 			knife.x > self.viewport.x + $window.width/2 + $window.width/16 or 
 			knife.x < self.viewport.x - $window.width/16 or 
@@ -144,7 +144,7 @@ class Scene < GameState
 		end
 		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}"
 		#~ $window.caption = "Scene0, #{@player.status}, #{@player.action}"
-		$window.caption = "Scene0, FPS: #{$window.fps}"
+		$window.caption = "Scene0, FPS: #{$window.fps} | #{$window.frame}, [#{@player.status}, #{@player.action}]"
 	end
 end
 
