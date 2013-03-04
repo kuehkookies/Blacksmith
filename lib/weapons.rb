@@ -153,8 +153,8 @@ class Torch < Subweapons
 		super
 		@image = Image["weapons/torch.gif"]
 		@zorder = 300
-		@velocity_x *= 2
-		@velocity_y = -2
+		@velocity_x *= 4
+		@velocity_y = 0
 		@acceleration_y = 0.4
 		@max_velocity = 8
 		@rotation = 50*self.factor_x
@@ -169,6 +169,7 @@ class Torch < Subweapons
 		@velocity_x = 0
 		@velocity_y = 0
 		@color.alpha = 0
+		Sound["sfx/torch_fire.wav"].play unless @on_ground
 		#~ Torch_Fire.create(:x => @x, :y => @y+10) if !@on_ground
 		#~ after(70){@on_ground = true; Torch_Fire.create(:x => @x, :y => @y) if @on_ground}
 		@on_ground = true # Torch_Fire.create(:x => @x, :y => @y)
@@ -237,6 +238,7 @@ class Rang < Subweapons
 		@max_velocity = 2
 		@damage = 3
 		cache_bounding_box
+		every(12){Sound["sfx/swing.wav"].play(0.5)}
 	end
 	
 	def update

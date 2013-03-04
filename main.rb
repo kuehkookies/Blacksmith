@@ -81,7 +81,7 @@ class Game < Chingu::Window
 	
 	def setup_stage
 		@level = 1
-		@block = 1
+		@block = 2 # 1
 	end
 	
 	def reset_stage
@@ -147,6 +147,7 @@ class Game < Chingu::Window
 	
 	def update
 		@frame += 1 unless @paused
+		#~ p self.fps if @frame % 60 == 0
 		super
 	end
 end

@@ -48,6 +48,7 @@ class Scene < GameState
 		#~ $game_bgm = Gosu::Song.new("media/bgm/#{Module_Game::BGM[$window.level-1]}.ogg", :volume => 0.3)
 		#~ p "#{Module_Game::BGM[$window.map.current_level]}.ogg"
 		#~ p "#{Module_Game::BGM}"
+		
 		@hud.update
 	end
 	
@@ -64,8 +65,8 @@ class Scene < GameState
 	end
 	
 	def edit
-		#~ push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Zombie, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM, BridgeGraySmall, BridgeGrayLeftSmall, BridgeGrayRightSmall, BridgeGrayPoleSmall, BridgeGrayMidSmall, Zombie, Ball_Rang, Ball,Ground] ))
-		push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Ground, GroundTiled, GroundLower, GroundLoop, GroundBack, BridgeGray, BridgeGrayLeft, BridgeGrayMid, BridgeGrayRight, BridgeGrayPole, BridgeGrayLL, BridgeGrayLR, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM] ))
+		#~ push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Ground, GroundTiled, GroundLower, GroundLoop, Brick, Brick_Loop, Bridge_Wood, BridgeGrayPole, BridgeGrayDeco, BridgeGrayDecoL, BridgeGrayDecoR, BridgeGrayDecoM] ))
+		push_game_state(GameStates::Edit.new(:grid => [8,8], :classes => [Ground, GroundTiled, GroundLower, GroundLoop, Brick, Brick_Loop, Brick_Loop_Back, Brick_Window, Brick_Window_Small, Bridge_Wood] ))
 	end
 	
 	def clear_game_terrains
@@ -126,7 +127,6 @@ class Scene < GameState
 	def update
 		game_objects.each { |game_object| game_object.unpause } if !$window.paused and !$window.transferring
 		super
-		#~ update_trait unless $window.paused
 		@hud.update
 		#~ update_trait
 		self.viewport.center_around(@player) unless $window.passing_door
@@ -144,18 +144,19 @@ class Scene < GameState
 		end
 		#~ $window.caption = "Scene0, FPS: #{$window.fps}, #{@player.x.to_i}:#{@player.y.to_i}[#{@player.velocity_y.to_i}-#{@player.y_flag}], #{$window.subweapon}"
 		#~ $window.caption = "Scene0, #{@player.status}, #{@player.action}"
-		$window.caption = "Scene0, FPS: #{$window.fps} | #{$window.frame}, [#{@player.status}, #{@player.action}]"
+		#~ $window.caption = "Scene0, FPS: #{$window.fps} | #{$window.frame}, [#{@player.status}, #{@player.action}]"
 	end
 end
 
 class Level00 < Scene
 	def initialize
 		super
-		@area = [512, 304]
+		#~ @area = [512, 304]
+		@area = [768, 288]
 		self.viewport.game_area = [0,0,@area[0],@area[1]]
 		self.viewport.y = 64
 		@player.x = 64
-		@player.y = 272
+		@player.y = 240
 		@player.y_flag = @player.y
 		@backdrop << {:image => "parallax/panorama1-1.png", :damping => 10, :repeat_x => true, :repeat_y => false}
 		@backdrop << {:image => "parallax/bg1-1.png", :damping => 5, :repeat_x => true, :repeat_y => false}
@@ -171,7 +172,7 @@ class Level00 < Scene
 	 
 	def update
 		super
-		if @player.x >= @area[0]-(@player.bb.width) - 4 and @player.idle # and !$window.waiting
+		if @player.x >= @area[0]-(@player.bb.width) - 2 and @player.idle # and !$window.waiting
 			$window.in_event = true
 			@player.move(2,0)
 			if @player.x >= @area[0] + 32
@@ -204,9 +205,9 @@ end
 class Level01 < Scene
 	def initialize
 		super
-		@area = [640,304]
+		@area = [320,368]
 		@player.x = 16 # self.viewport.x+(@player.bb.width/2)+16 # 32
-		@player.y = 272 # 246
+		@player.y = 296 # 246
 		@player.y_flag = @player.y
 		self.viewport.game_area = [0,0,@area[0],@area[1]]
 		self.viewport.y = 80

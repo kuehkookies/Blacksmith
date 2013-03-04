@@ -41,8 +41,10 @@ class GroundLower < Solid; end
 class GroundLoop < Solid; end
 class GroundTiled < Solid; end
 class Brick < Solid; end
+class Brick_Loop < Solid; end
 
 class Bridge < Block; end
+class Bridge_Wood < Bridge; end
 class BridgeGray < Bridge; end
 class BridgeGrayLeft < Bridge; end
 class BridgeGrayRight < Bridge; end
@@ -50,6 +52,10 @@ class BridgeGrayMid < Bridge; end
 
 class Decoration < Block; end
 class GroundBack < Decoration;  def setup; super; @color = Color.new(0xff808080); end; end
+class Brick_Loop_Back < Decoration; end
+class Brick_Window < Decoration; end
+class Brick_Window_Small < Decoration; end
+
 class BridgeGrayPole < Decoration; end
 class BridgeGrayLL < Decoration; end
 class BridgeGrayLR < Decoration; end

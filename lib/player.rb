@@ -253,12 +253,17 @@ class Player < Chingu::GameObject
 				@x += 4 * self.factor_x  # 2 * @speed * self.factor_x 
 				@image = @animations[:jump].first
 				@status = :jump; @jumping = true
+				#~ @action = :stand
 				Sound["sfx/jump.wav"].play
 				@velocity_x = 4 * self.factor_x  # 2 * @speed * self.factor_x 
-				@velocity_y = -6
+				#~ @velocity_y = -6
+			}
+			between(6,15){
+				@velocity_y = -6 if @jumping
+				@velocity_y = -2 if !@jumping
 			}
 			#~ after(250){ @action = :stand; @velocity_y = -2; @y_flag = @y; @velocity_x = 0}
-			after(15){ @action = :stand; @velocity_y = -2; @y_flag = @y; @velocity_x = 0}
+			after(15){ @action = :stand; @velocity_y = -2 if @jumping; @y_flag = @y; @velocity_x = 0}
 			#~ }.then{@status = :jump; @jumping = true; Sound["sfx/jump.wav"].play}
 			#~ between(100,250){
 				#~ @image = @animations[:jump].first
@@ -287,6 +292,7 @@ class Player < Chingu::GameObject
 					@velocity_y = -1 unless !@jumping
 				end
 			}
+			#~ after(9) {@jumping = false}
 		end
 	end
 	
@@ -313,7 +319,8 @@ class Player < Chingu::GameObject
 	def land?
 		self.each_collision(*$window.terrains) do |me, stone_wall|
 		#~ self.each_collision(Ground,GroundTiled) do |me, stone_wall|
-			if self.velocity_y < 0 and not walljumping  # Hitting the ceiling
+			#~ if self.velocity_y < 0 and not walljumping  # Hitting the ceiling
+			if me.y >= stone_wall.bb.bottom and self.velocity_y < 0 # Hitting the ceiling
 				me.y = stone_wall.bb.bottom + me.image.height * me.factor_y
 				me.velocity_y = 0
 				@jumping = false
@@ -545,7 +552,8 @@ class Player < Chingu::GameObject
 			@sword.bb.height = ((@sword.bb.width*1/10))
 		}
 		#~ between(175, 350) {
-		between(11,28) {
+		#~ between(11,28) {
+		between(11,24) {
 			unless disabled or raising_sword
 				@sword.zorder = self.zorder - 1
 				@sword.x = @x-(13*factor)+((-1)*factor)
